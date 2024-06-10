@@ -1,24 +1,30 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Index from './components/Index';
+import Login from './components/Login';
+import Register from './components/Register';
+import Dashboard from './components/Dashboard';
+import ClientList from './components/ClientList';
+import ClientInfo from './components/ClientInfo';
+import PickupInfo from './components/PickupInfo';
+import UserDashboard from './components/UserDashboard';
+import EditUser from './components/EditUser';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        <Route exact path="/" element={<Index />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/clientList" element={<ClientList />} />
+        <Route path="/clientInfo/:clientID" element={<ClientInfo />} />
+        <Route path="/pickupInfo" element={<PickupInfo />} />
+        <Route path="/userDashboard" element={<UserDashboard />} />
+        <Route path="/editUser/:userID" element={<EditUser />} />
+      </Routes>
+    </Router>
   );
 }
 
