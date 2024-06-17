@@ -1,17 +1,27 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { loginSuccess } from '../redux/actions/authActions';
+import { jwtDecode } from 'jwt-decode';
+import axiosInstance from '../axiosInstance';
 
 const Login = () => {
   const [userID, setUserID] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/auth/login', { userID, password });
-      // Handle successful login, e.g., redirect to dashboard
+      const response = await axiosInstance.post('/api/login', { userID, password });
+      const { token } = response.data;
+      const decodedToken = jwtDecode(token);
+      const userType = decodedToken.userType;
+      console.log('Decoded user type:', userType); // Add this line
+      dispatch(loginSuccess(token, userType));
+      navigate('/dashboard');
     } catch (error) {
       setMessage('Invalid credentials');
     }

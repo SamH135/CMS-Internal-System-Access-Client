@@ -1,36 +1,44 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { jwtDecode } from 'jwt-decode';
+import axiosInstance from '../axiosInstance';
+import Logout from './Logout';
 
 const ClientInfo = () => {
   const [client, setClient] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const { clientID } = useParams();
   const navigate = useNavigate();
+  const token = useSelector((state) => state.auth.token);
+  const isAdmin = token ? jwtDecode(token).userType === 'admin' : false;
 
   useEffect(() => {
     const fetchClientInfo = async () => {
       try {
-        const response = await axios.get(`/auth/clientInfo/${clientID}`);
+        const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/clientInfo/${clientID}`);
         setClient(response.data.client);
-        setIsAdmin(response.data.isAdmin);
       } catch (error) {
         console.error('Error retrieving client:', error);
       }
     };
 
-    fetchClientInfo();
-  }, [clientID]);
+    if (token) {
+      fetchClientInfo();
+    } else {
+      navigate('/login');
+    }
+  }, [clientID, token, navigate]);
 
   const handleUpdateClient = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/auth/updateClient', {
+      await axiosInstance.post(`${process.env.REACT_APP_API_URL}/api/updateClient`, {
         clientID: client.ClientID,
         clientName: client.ClientName,
         clientLocation: client.ClientLocation,
       });
-      // Handle successful update, e.g., show a success message
+      setSuccessMessage('Client updated successfully');
     } catch (error) {
       console.error('Error updating client:', error);
     }
@@ -47,7 +55,7 @@ const ClientInfo = () => {
         <ul>
           <li><Link to="/dashboard">Dashboard</Link></li>
           <li><Link to="/clientList">Client List</Link></li>
-          <li><button onClick={() => navigate.push('/auth/logout')}>Logout</button></li>
+          <li><Logout /></li>
         </ul>
       </nav>
 
@@ -57,8 +65,8 @@ const ClientInfo = () => {
             <strong>Client Information</strong>
           </div>
           <div className="card-body">
+            {successMessage && <div className="alert alert-success">{successMessage}</div>}
             <form onSubmit={handleUpdateClient}>
-              <input type="hidden" name="clientID" value={client.ClientID} />
               <div className="form-group">
                 <label htmlFor="clientName">Client Name:</label>
                 <input type="text" className="form-control" name="clientName" id="clientName" value={client.ClientName} onChange={(e) => setClient({ ...client, ClientName: e.target.value })} readOnly={!isAdmin} />
@@ -71,7 +79,6 @@ const ClientInfo = () => {
                 <label htmlFor="clientType">Client Type:</label>
                 <input type="text" className="form-control" name="clientType" id="clientType" value={client.ClientType} onChange={(e) => setClient({ ...client, ClientType: e.target.value })} readOnly={!isAdmin} />
               </div>
-              {/* Add more form fields for other client data */}
               {isAdmin && (
                 <button type="submit" className="btn btn-primary">Save Changes</button>
               )}

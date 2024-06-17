@@ -1,41 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import Logout from './Logout';
 
 const Dashboard = () => {
-  const [userType, setUserType] = useState('');
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchUserType = async () => {
-      try {
-        const response = await axios.get('/auth/dashboard');
-        setUserType(response.data.userType);
-      } catch (error) {
-        // Handle error, e.g., redirect to login if unauthorized
-        navigate.push('/login');
-      }
-    };
-
-    fetchUserType();
-  }, [navigate]);
-
-  const handleLogout = async () => {
-    try {
-      await axios.get('/auth/logout');
-      // Handle successful logout, e.g., redirect to index
-      navigate.push('/');
-    } catch (error) {
-      console.error('Error during logout:', error);
-    }
-  };
+  const userType = useSelector((state) => state.auth.userType);
+  
 
   return (
     <div>
       <nav>
         <h4>Client Management System</h4>
         <ul>
-          <li><button onClick={handleLogout}>Logout</button></li>
+          <li><Logout /></li>
         </ul>
       </nav>
 
@@ -65,17 +42,19 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-            <div className="row mt-4">
-              <div className="col-sm-6">
-                <div className="card">
-                  <div className="card-body">
-                    <h5 className="card-title">User Dashboard</h5>
-                    <p className="card-text">Manage system users.</p>
-                    <Link to="/userDashboard" className="btn btn-primary">Go to User Dashboard</Link>
+            {userType === 'admin' && (
+              <div className="row mt-4">
+                <div className="col-sm-6">
+                  <div className="card">
+                    <div className="card-body">
+                      <h5 className="card-title">User Dashboard</h5>
+                      <p className="card-text">Manage system users.</p>
+                      <Link to="/userDashboard" className="btn btn-primary">Go to User Dashboard</Link>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

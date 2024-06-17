@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Register = () => {
@@ -9,14 +9,25 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/auth/register', { userID, username, userType, password, confirmPassword });
-      // Handle successful registration, e.g., redirect to login
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/register`, { userID, username, userType, password, confirmPassword });
+      
+      if (response.data.success) {
+        setMessage(response.data.message);
+        setIsSuccess(true);
+        navigate('/login'); // Redirect to the login page after successful registration
+      } else {
+        setMessage(response.data.message);
+        setIsSuccess(false);
+      }
     } catch (error) {
       setMessage('An error occurred during registration');
+      setIsSuccess(false);
     }
   };
 
@@ -69,7 +80,11 @@ const Register = () => {
             </form>
           </div>
         </div>
-        {message && <h4 className="alert alert-danger mt-4">{message}</h4>}
+        {message && (
+          <div className={`alert mt-4 ${isSuccess ? 'alert-success' : 'alert-danger'}`}>
+            {message}
+          </div>
+        )}
       </div>
     </div>
   );

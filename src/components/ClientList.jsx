@@ -1,36 +1,44 @@
+// src/components/ClientList.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useSelector } from 'react-redux';
+import axiosInstance from '../axiosInstance';
+import Logout from './Logout';
 
 const ClientList = () => {
+  const token = useSelector((state) => state.auth.token);
   const [clients, setClients] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const response = await axios.get('/auth/clientList');
-        setClients(response.data.clients);
-      } catch (error) {
-        console.error('Error retrieving clients:', error);
-      }
-    };
+    if (!token) {
+      navigate('/login');
+    } else {
+      fetchClients();
+    }
+  }, [token, navigate]);
 
-    fetchClients();
-  }, []);
-
+  const fetchClients = async () => {
+    try {
+      const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/clientList`);
+      setClients(response.data.clients);
+    } catch (error) {
+      console.error('Error retrieving clients:', error);
+    }
+  };
+  
   const handleSearch = async () => {
     try {
-      const response = await axios.get(`/auth/searchClients?term=${encodeURIComponent(searchTerm)}`);
+      const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/searchClients?term=${encodeURIComponent(searchTerm)}`);
       setClients(response.data.clients);
     } catch (error) {
       console.error('Error searching clients:', error);
     }
   };
 
-  const handleClientClick = (clientID) => {
-    navigate.push(`/clientInfo/${clientID}`);
+  const handleClientClick = (clientid) => {
+    navigate(`/clientInfo/${clientid}`);
   };
 
   return (
@@ -39,7 +47,7 @@ const ClientList = () => {
         <h4>Client Management System</h4>
         <ul>
           <li><Link to="/dashboard">Dashboard</Link></li>
-          <li><button onClick={() => navigate.push('/auth/logout')}>Logout</button></li>
+          <li><Logout /></li>
         </ul>
       </nav>
 
@@ -59,16 +67,14 @@ const ClientList = () => {
                   <th>Client ID</th>
                   <th>Client Name</th>
                   <th>Location</th>
-                  {/* Add more table headers as needed */}
                 </tr>
               </thead>
               <tbody>
                 {clients.map((client) => (
-                  <tr key={client.ClientID} onClick={() => handleClientClick(client.ClientID)}>
-                    <td>{client.ClientID}</td>
-                    <td>{client.ClientName}</td>
-                    <td>{client.ClientLocation}</td>
-                    {/* Add more table cells as needed */}
+                  <tr key={client.clientid} onClick={() => handleClientClick(client.clientid)}>
+                    <td>{client.clientid}</td>
+                    <td>{client.clientname}</td>
+                    <td>{client.clientlocation}</td>
                   </tr>
                 ))}
               </tbody>

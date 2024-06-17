@@ -68,3 +68,54 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+HOW TO RUN:
+
+    npx create-react-app your-app-name
+
+    npm install @testing-library/jest-dom @testing-library/react @testing-library/user-event axios bootstrap react react-dom react-redux react-router-dom redux redux-thunk web-vitals @babel/plugin-proposal-private-property-in-object react-scripts @reduxjs/toolkit
+
+    npm start
+
+
+THINGS TO DO:
+
+     The user type is already included in the JWT payload, so storing it separately in the client-side Redux store is redundant and unnecessary.
+
+    add react redux for user state management 
+        - so that users can't access unauthorized pages
+
+    Replace axios with axiosInstance for making API requests.
+
+    Remove the withCredentials option from API requests.
+
+    need to fix ALL api routes
+
+    need to fix logout - make component? 
+
+    need to fix pickupInfo page
+
+    improve editUser and editClient/clientInfo to be more GUI friendly
+
+    mess around with the CSS
+

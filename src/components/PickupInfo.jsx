@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axiosInstance from '../axiosInstance';
 
 const PickupInfo = () => {
   const [clients, setClients] = useState([]);
@@ -10,19 +10,19 @@ const PickupInfo = () => {
   useEffect(() => {
     const fetchPickupInfo = async () => {
       try {
-        const response = await axios.get('/auth/pickupInfo');
+        const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/pickupInfo`);
         setClients(response.data.clients);
       } catch (error) {
         console.error('Error retrieving pickup information:', error);
       }
     };
-
+  
     fetchPickupInfo();
   }, []);
-
+  
   const handleSearch = async () => {
     try {
-      const response = await axios.get(`/auth/searchClients?term=${encodeURIComponent(searchTerm)}`);
+      const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/searchClients?term=${encodeURIComponent(searchTerm)}`);
       setClients(response.data.clients);
     } catch (error) {
       console.error('Error searching clients:', error);
@@ -35,7 +35,7 @@ const PickupInfo = () => {
         <h4>Client Management System</h4>
         <ul>
           <li><Link to="/dashboard">Dashboard</Link></li>
-          <li><button onClick={() => navigate.push('/auth/logout')}>Logout</button></li>
+          <li><button onClick={() => navigate('/logout')}>Logout</button></li>
         </ul>
       </nav>
 
@@ -60,11 +60,11 @@ const PickupInfo = () => {
               </thead>
               <tbody>
                 {clients.map((client) => (
-                  <tr key={client.ClientID}>
-                    <td>{client.ClientName}</td>
-                    <td>{client.ClientLocation}</td>
-                    <td>{client.LastPickupDate}</td>
-                    <td>{client.NeedsPickup ? 'Yes' : 'No'}</td>
+                  <tr key={client.clientid}>
+                    <td>{client.clientname}</td>
+                    <td>{client.clientlocation}</td>
+                    <td>{client.lastpickupdate}</td>
+                    <td>{client.needspickup ? 'Yes' : 'No'}</td>
                   </tr>
                 ))}
               </tbody>
