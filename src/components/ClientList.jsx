@@ -1,9 +1,9 @@
-// src/components/ClientList.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
+import Table from './Table';
 
 const ClientList = () => {
   const token = useSelector((state) => state.auth.token);
@@ -28,7 +28,8 @@ const ClientList = () => {
     }
   };
   
-  const handleSearch = async () => {
+  const handleSearch = async (e) => {
+    e.preventDefault();
     try {
       const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/searchClients?term=${encodeURIComponent(searchTerm)}`);
       setClients(response.data.clients);
@@ -53,32 +54,27 @@ const ClientList = () => {
 
       <div className="container mt-4">
         <div className="card">
-          <div className="card-header text-center">
+          <div className="card-header text-center d-flex justify-content-center align-items-center">
+            <img src="/client_list_button_icon.png" alt="Client icon" className="card-icon me-2" />
             <strong>Client List</strong>
           </div>
           <div className="card-body">
-            <div className="form-group">
-              <input type="text" className="form-control" id="searchInput" placeholder="Search by client name, ID, or location" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-              <button type="button" className="btn btn-primary mt-2" onClick={handleSearch}>Search</button>
-            </div>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Client ID</th>
-                  <th>Client Name</th>
-                  <th>Location</th>
-                </tr>
-              </thead>
-              <tbody>
-                {clients.map((client) => (
-                  <tr key={client.clientid} onClick={() => handleClientClick(client.clientid)}>
-                    <td>{client.clientid}</td>
-                    <td>{client.clientname}</td>
-                    <td>{client.clientlocation}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <form onSubmit={handleSearch}>
+              <div className="form-group">
+                <input type="text" className="form-control" id="searchInput" placeholder="Search by client name, ID, or location" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+              </div>
+              <button type="submit" className="btn btn-primary mt-2">Search</button>
+            </form>
+            <br />
+            <Table
+              columns={[
+                { header: 'Client ID', field: 'clientid' },
+                { header: 'Client Name', field: 'clientname' },
+                { header: 'Location', field: 'clientlocation' },
+              ]}
+              data={clients}
+              onRowClick={(client) => handleClientClick(client.clientid)}
+            />
           </div>
         </div>
       </div>

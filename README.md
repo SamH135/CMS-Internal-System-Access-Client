@@ -100,22 +100,14 @@ HOW TO RUN:
 
 THINGS TO DO:
 
-     The user type is already included in the JWT payload, so storing it separately in the client-side Redux store is redundant and unnecessary.
+    clientInfo doesn't save changes 
 
-    add react redux for user state management 
-        - so that users can't access unauthorized pages
+    add `view requests` page
 
-    Replace axios with axiosInstance for making API requests.
+    login page doesn't show userID
 
-    Remove the withCredentials option from API requests.
-
-    need to fix ALL api routes
-
-    need to fix logout - make component? 
-
-    need to fix pickupInfo page
-
-    improve editUser and editClient/clientInfo to be more GUI friendly
+    improve editUser and editClient/clientInfo to be more GUI friendly and show all fields
+        - only allows admins to 'edit'
 
     mess around with the CSS
 

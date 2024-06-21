@@ -18,9 +18,7 @@ const Index = () => {
           <p className="lead">This is a React web application that connects to an API server with a PostgreSQL database to allow users to interact with the relational database that is used for client data management purposes</p>
           <hr className="my-4" />
           <p>The functionality available to each user will depend on their access level. E.g. Regular employees can view client data and route/receipt information, administrators can update and delete data for clients/user/etc. </p>
-          <p className="lead">
-            <Link className="btn btn-primary btn-lg" to="#" role="button">Learn more</Link>
-          </p>
+          
         </div>
       </div>
     </div>

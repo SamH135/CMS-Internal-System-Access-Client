@@ -5,7 +5,6 @@ import Logout from './Logout';
 
 const Dashboard = () => {
   const userType = useSelector((state) => state.auth.userType);
-  
 
   return (
     <div>
@@ -17,47 +16,84 @@ const Dashboard = () => {
       </nav>
 
       <div className="container mt-4">
-        <div className="card">
+        <div className="card outer-card">
           <div className="card-header text-center">
-            <strong>Welcome, {userType}!</strong>
+            Signed in with permission level: {userType}
           </div>
+
           <div className="card-body">
             <div className="row">
-              <div className="col-sm-6">
-                <div className="card">
-                  <div className="card-body">
-                    <h5 className="card-title">Client List</h5>
-                    <p className="card-text">View and search client list.</p>
-                    <Link to="/clientList" className="btn btn-primary">Go to Client List</Link>
-                  </div>
-                </div>
-              </div>
-              <div className="col-sm-6">
-                <div className="card">
-                  <div className="card-body">
-                    <h5 className="card-title">Pickup Information</h5>
-                    <p className="card-text">View and manage pickup details.</p>
-                    <Link to="/pickupInfo" className="btn btn-primary">Go to Pickup Info</Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {userType === 'admin' && (
-              <div className="row mt-4">
-                <div className="col-sm-6">
-                  <div className="card">
-                    <div className="card-body">
-                      <h5 className="card-title">User Dashboard</h5>
-                      <p className="card-text">Manage system users.</p>
-                      <Link to="/userDashboard" className="btn btn-primary">Go to User Dashboard</Link>
+              <div className="col-sm-6 mb-4">
+                <Link to="/clientList" className="card-link">
+                  <div className="card inner-card">
+                    <div className="card-body d-flex justify-content-between align-items-center">
+                      <h5 className="card-title mb-0">Clients</h5>
+                      <img src="/client_list_button_icon.png" alt="Client icon" className="card-icon" />
                     </div>
                   </div>
-                </div>
+                </Link>
               </div>
-            )}
+              <div className="col-sm-6 mb-4">
+                <Link to="/pickupInfo" className="card-link">
+                  <div className="card inner-card">
+                    <div className="card-body d-flex justify-content-between align-items-center">
+                      <h5 className="card-title mb-0">Routes</h5>
+                      <img src="/route_info_button_icon.png" alt="Route icon" className="card-icon" />
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            </div>
+            <div className="row">
+              {userType === 'admin' && (
+                <div className="col-sm-6 mb-4">
+                  <Link to="/userDashboard" className="card-link">
+                    <div className="card inner-card">
+                      <div className="card-body d-flex justify-content-between align-items-center">
+                        <h5 className="card-title mb-0">Users</h5>
+                        <img src="/manage_accounts_button_icon.png" alt="Manage accounts icon" className="card-icon" />
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              )}
+              <div className="col-sm-6 mb-4">
+                <Link to="/newPage" className="card-link">
+                  <div className="card inner-card">
+                    <div className="card-body d-flex justify-content-between align-items-center">
+                      <h5 className="card-title mb-0">Receipts</h5>
+                      <img src="/receipt_log_button_icon.png" alt="Receipt log icon" className="card-icon" />
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+      <style>
+        {`
+          .card-icon {
+            width: 48px;
+            height: 48px;
+            filter: brightness(0.5);
+          }
+          .card-link {
+            text-decoration: none;
+            color: inherit;
+          }
+          .card-link:hover {
+            text-decoration: none;
+          }
+          .inner-card {
+            transition: all 0.3s ease;
+          }
+          .inner-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+          }
+        `}
+      </style>
     </div>
   );
 };

@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { jwtDecode } from 'jwt-decode';
 import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
-
+import Table from './Table';
 
 const UserDashboard = () => {
   const [users, setUsers] = useState([]);
@@ -13,7 +13,6 @@ const UserDashboard = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
   const token = useSelector((state) => state.auth.token);
-
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -33,7 +32,8 @@ const UserDashboard = () => {
     }
   }, [token, navigate]);
   
-  const handleSearch = async () => {
+  const handleSearch = async (e) => {
+    e.preventDefault();
     try {
       const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/searchUsers?term=${encodeURIComponent(searchTerm)}`);
       setUsers(response.data.users);
@@ -75,40 +75,38 @@ const UserDashboard = () => {
 
       <div className="container mt-4">
         <div className="card">
-          <div className="card-header text-center">
-            <strong>User Dashboard</strong>
-          </div>
+        <div className="card-header text-center d-flex justify-content-center align-items-center">
+          <img src="/manage_accounts_button_icon.png" alt="User dashboard icon" className="card-icon me-2" />
+          <strong>User Dashboard</strong>
+        </div>
           <div className="card-body">
             {successMessage && <div className="alert alert-success">{successMessage}</div>}
-            <div className="form-group">
-              <input type="text" className="form-control" id="searchInput" placeholder="Search by username or ID" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-              <button type="button" className="btn btn-primary mt-2" onClick={handleSearch}>Search</button>
-            </div>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>User ID</th>
-                  <th>Username</th>
-                  <th>User Type</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <tr key={user.userid}>
-                    <td>{user.userid}</td>
-                    <td>{user.username}</td>
-                    <td>{user.usertype}</td>
-                    <td>
-                      <button type="button" className="btn btn-primary" onClick={() => handleEditUser(user.userid)}>Edit</button>
-                      {user.userid !== currentUserID && (
-                        <button type="button" className="btn btn-danger" onClick={() => handleDeleteUser(user.userid)}>Delete</button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <form onSubmit={handleSearch}>
+              <div className="form-group">
+                <input type="text" className="form-control" id="searchInput" placeholder="Search by username or ID" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+              </div>
+              <button type="submit" className="btn btn-primary mt-2">Search</button>
+            </form>
+            <br></br>
+            <Table
+              columns={[
+                { header: 'User ID', field: 'userid' },
+                { header: 'Username', field: 'username' },
+                { header: 'User Type', field: 'usertype' },
+                { header: 'Actions', field: 'actions' },
+              ]}
+              data={users.map((user) => ({
+                ...user,
+                actions: (
+                  <>
+                    <button type="button" className="btn btn-primary" onClick={() => handleEditUser(user.userid)}>Edit</button>
+                    {user.userid !== currentUserID && (
+                      <button type="button" className="btn btn-danger" onClick={() => handleDeleteUser(user.userid)}>Delete</button>
+                    )}
+                  </>
+                ),
+              }))}
+            />
           </div>
         </div>
       </div>
