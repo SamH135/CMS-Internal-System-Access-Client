@@ -58,14 +58,14 @@ const Dashboard = () => {
                 </div>
               )}
               <div className="col-sm-6 mb-4">
-                <Link to="/newPage" className="card-link">
-                  <div className="card inner-card">
-                    <div className="card-body d-flex justify-content-between align-items-center">
-                      <h5 className="card-title mb-0">Receipts</h5>
-                      <img src="/receipt_log_button_icon.png" alt="Receipt log icon" className="card-icon" />
-                    </div>
+              <Link to="/receiptList" className="card-link">
+                <div className="card inner-card">
+                  <div className="card-body d-flex justify-content-between align-items-center">
+                    <h5 className="card-title mb-0">Receipts</h5>
+                    <img src="/receipt_log_button_icon.png" alt="Receipt log icon" className="card-icon" />
                   </div>
-                </Link>
+                </div>
+              </Link>
               </div>
             </div>
           </div>

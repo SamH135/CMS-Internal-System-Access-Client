@@ -12,9 +12,23 @@ import PickupInfo from './components/PickupInfo';
 import UserDashboard from './components/UserDashboard';
 import EditUser from './components/EditUser';
 import PrivateRoute from './components/PrivateRoute.jsx';
+import ReceiptList from './components/ReceiptList';
+import ReceiptInfo from './components/ReceiptInfo';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { loginSuccess } from './redux/actions/authActions';
 
 function App() {
+  const dispatch = useDispatch();
   const userType = useSelector((state) => state.auth.userType);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const storedUserType = localStorage.getItem('userType');
+    if (token && storedUserType) {
+      dispatch(loginSuccess(token, storedUserType));
+    }
+  }, [dispatch]);
 
   return (
     <Router>
@@ -29,6 +43,8 @@ function App() {
         <Route path="/userDashboard" element={<PrivateRoute element={UserDashboard} roles={['admin']} />} />
         <Route path="/editUser/:userID" element={<PrivateRoute element={EditUser} roles={['admin']} />} />
         <Route path="*" element={<Navigate to={userType ? '/dashboard' : '/login'} />} />
+        <Route path="/receiptList" element={<ReceiptList />} />
+        <Route path="/receiptInfo/:receiptID" element={<ReceiptInfo />} />
       </Routes>
     </Router>
   );

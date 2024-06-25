@@ -15,25 +15,24 @@ const UserDashboard = () => {
   const token = useSelector((state) => state.auth.token);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/userDashboard`);
-        setUsers(response.data.users);
-        setCurrentUserID(response.data.currentUserID);
-      } catch (error) {
-        console.error('Error retrieving users:', error);
-      }
-    };
-  
     if (token && jwtDecode(token).userType === 'admin') {
       fetchUsers();
     } else {
       navigate('/dashboard');
     }
   }, [token, navigate]);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/userDashboard`);
+      setUsers(response.data.users);
+      setCurrentUserID(response.data.currentUserID);
+    } catch (error) {
+      console.error('Error retrieving users:', error);
+    }
+  };
   
-  const handleSearch = async (e) => {
-    e.preventDefault();
+  const handleSearch = async () => {
     try {
       const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/searchUsers?term=${encodeURIComponent(searchTerm)}`);
       setUsers(response.data.users);
@@ -75,19 +74,38 @@ const UserDashboard = () => {
 
       <div className="container mt-4">
         <div className="card">
-        <div className="card-header text-center d-flex justify-content-center align-items-center">
-          <img src="/manage_accounts_button_icon.png" alt="User dashboard icon" className="card-icon me-2" />
-          <strong>User Dashboard</strong>
-        </div>
+          <div className="card-header text-center d-flex justify-content-center align-items-center">
+            <img src="/manage_accounts_button_icon.png" alt="User dashboard icon" className="card-icon me-2" />
+            <strong>User Dashboard</strong>
+          </div>
           <div className="card-body">
             {successMessage && <div className="alert alert-success">{successMessage}</div>}
-            <form onSubmit={handleSearch}>
-              <div className="form-group">
-                <input type="text" className="form-control" id="searchInput" placeholder="Search by username or ID" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-              </div>
-              <button type="submit" className="btn btn-primary mt-2">Search</button>
-            </form>
-            <br></br>
+            <div className="search-container">
+              <input 
+                type="text" 
+                id="searchInput" 
+                className="form-control" 
+                placeholder="Search by username or ID" 
+                value={searchTerm} 
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyUp={(e) => e.key === 'Enter' && handleSearch()}
+              />
+              <img 
+                src="/search_button_icon.png" 
+                alt="Search" 
+                className={`search-icon ${searchTerm ? 'hidden' : ''}`}
+                onClick={handleSearch}
+              />
+              <img 
+                src="/close_button_icon.png" 
+                alt="Clear" 
+                className={`clear-icon ${searchTerm ? '' : 'hidden'}`}
+                onClick={() => {
+                  setSearchTerm('');
+                  fetchUsers();
+                }}
+              />
+            </div>
             <Table
               columns={[
                 { header: 'User ID', field: 'userid' },

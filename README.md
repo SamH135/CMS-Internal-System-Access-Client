@@ -100,14 +100,19 @@ HOW TO RUN:
 
 THINGS TO DO:
 
-    clientInfo doesn't save changes 
 
     add `view requests` page
 
-    login page doesn't show userID
+    add new client option - also in BE
+
+    add view/search receipts page
+
+    add receipt info page
 
     improve editUser and editClient/clientInfo to be more GUI friendly and show all fields
         - only allows admins to 'edit'
 
     mess around with the CSS
+
+    update npm install command at the end
 

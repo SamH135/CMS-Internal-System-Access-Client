@@ -28,8 +28,7 @@ const ClientList = () => {
     }
   };
   
-  const handleSearch = async (e) => {
-    e.preventDefault();
+  const handleSearch = async () => {
     try {
       const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/searchClients?term=${encodeURIComponent(searchTerm)}`);
       setClients(response.data.clients);
@@ -59,13 +58,32 @@ const ClientList = () => {
             <strong>Client List</strong>
           </div>
           <div className="card-body">
-            <form onSubmit={handleSearch}>
-              <div className="form-group">
-                <input type="text" className="form-control" id="searchInput" placeholder="Search by client name, ID, or location" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-              </div>
-              <button type="submit" className="btn btn-primary mt-2">Search</button>
-            </form>
-            <br />
+            <div className="search-container">
+              <input 
+                type="text" 
+                id="searchInput" 
+                className="form-control" 
+                placeholder="Search by client name, ID, or location" 
+                value={searchTerm} 
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyUp={(e) => e.key === 'Enter' && handleSearch()}
+              />
+              <img 
+                src="/search_button_icon.png" 
+                alt="Search" 
+                className={`search-icon ${searchTerm ? 'hidden' : ''}`}
+                onClick={handleSearch}
+              />
+              <img 
+                src="/close_button_icon.png" 
+                alt="Clear" 
+                className={`clear-icon ${searchTerm ? '' : 'hidden'}`}
+                onClick={() => {
+                  setSearchTerm('');
+                  fetchClients();
+                }}
+              />
+            </div>
             <Table
               columns={[
                 { header: 'Client ID', field: 'clientid' },

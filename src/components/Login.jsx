@@ -19,7 +19,9 @@ const Login = () => {
       const { token } = response.data;
       const decodedToken = jwtDecode(token);
       const userType = decodedToken.userType;
-      console.log('Decoded user type:', userType); // Add this line
+      console.log('Decoded user type:', userType);
+      localStorage.setItem('token', token);
+      localStorage.setItem('userType', userType);
       dispatch(loginSuccess(token, userType));
       navigate('/dashboard');
     } catch (error) {
@@ -30,7 +32,7 @@ const Login = () => {
   return (
     <div>
       <nav>
-        <h4>Inventory Management System</h4>
+        <h4>Client Management System</h4>
         <ul>
           <li><Link to="/">Home</Link></li>
           <li><Link to="/register">Register</Link></li>

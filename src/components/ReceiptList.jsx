@@ -1,55 +1,61 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import axiosInstance from '../axiosInstance';
+import Logout from './Logout';
 import Table from './Table';
 
-const formatDate = (dateString) => {
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  return new Date(dateString).toLocaleDateString(undefined, options);
-};
-
-const PickupInfo = () => {
-  const [clients, setClients] = useState([]);
+const ReceiptList = () => {
+  const token = useSelector((state) => state.auth.token);
+  const [receipts, setReceipts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchPickupInfo();
-  }, []);
+    if (!token) {
+      navigate('/login');
+    } else {
+      fetchReceipts();
+    }
+  }, [token, navigate]);
 
-  const fetchPickupInfo = async () => {
+  const fetchReceipts = async () => {
     try {
-      const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/pickupInfo`);
-      setClients(response.data.clients);
+      const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/receiptList`);
+      setReceipts(response.data.receipts);
     } catch (error) {
-      console.error('Error retrieving pickup information:', error);
+      console.error('Error retrieving receipts:', error);
     }
   };
   
   const handleSearch = async () => {
     try {
-      const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/searchClients?term=${encodeURIComponent(searchTerm)}`);
-      setClients(response.data.clients);
+      const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/searchReceipts?term=${encodeURIComponent(searchTerm)}`);
+      setReceipts(response.data.receipts);
     } catch (error) {
-      console.error('Error searching clients:', error);
+      console.error('Error searching receipts:', error);
     }
+  };
+
+  const handleReceiptClick = (receiptID) => {
+    navigate(`/receiptInfo/${receiptID}`);
   };
 
   return (
     <div>
       <nav>
-        <h4>Client Management System</h4>
+        <h4>Receipt Management System</h4>
         <ul>
           <li><Link to="/dashboard">Dashboard</Link></li>
-          <li><button onClick={() => navigate('/logout')}>Logout</button></li>
+          <li><Logout /></li>
         </ul>
       </nav>
 
       <div className="container mt-4">
         <div className="card">
           <div className="card-header text-center d-flex justify-content-center align-items-center">
-            <img src="/route_info_button_icon.png" alt="Pickup info icon" className="card-icon me-2" />
-            <strong>Pickup Information</strong>
+            <img src="/receipt_log_button_icon.png" alt="Receipt icon" className="card-icon me-2" />
+            <strong>Receipt Log</strong>
           </div>
           <div className="card-body">
             <div className="search-container">
@@ -57,7 +63,7 @@ const PickupInfo = () => {
                 type="text" 
                 id="searchInput" 
                 className="form-control" 
-                placeholder="Search by client name or location" 
+                placeholder="Search by receipt ID or client name" 
                 value={searchTerm} 
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyUp={(e) => e.key === 'Enter' && handleSearch()}
@@ -74,22 +80,19 @@ const PickupInfo = () => {
                 className={`clear-icon ${searchTerm ? '' : 'hidden'}`}
                 onClick={() => {
                   setSearchTerm('');
-                  fetchPickupInfo();
+                  fetchReceipts();
                 }}
               />
             </div>
             <Table
               columns={[
+                { header: 'Receipt ID', field: 'receiptid' },
                 { header: 'Client Name', field: 'clientname' },
-                { header: 'Location', field: 'clientlocation' },
-                { header: 'Last Pickup Date', field: 'lastpickupdate' },
-                { header: 'Needs Pickup', field: 'needspickup' },
+                { header: 'Pickup Date', field: 'pickupdate', formatter: (value) => new Date(value).toLocaleDateString() },
+                { header: 'Total Payout', field: 'totalpayout', formatter: (value) => `$${value.toFixed(2)}` },
               ]}
-              data={clients.map((client) => ({
-                ...client,
-                lastpickupdate: formatDate(client.lastpickupdate),
-                needspickup: client.needspickup ? 'Yes' : 'No',
-              }))}
+              data={receipts}
+              onRowClick={(receipt) => handleReceiptClick(receipt.receiptid)}
             />
           </div>
         </div>
@@ -98,4 +101,4 @@ const PickupInfo = () => {
   );
 };
 
-export default PickupInfo;
+export default ReceiptList;
