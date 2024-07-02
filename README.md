@@ -101,15 +101,12 @@ HOW TO RUN:
 THINGS TO DO:
 
 
-    add `view requests` page
+    add `view requests` page - maybe to dashboard or routes
 
-    add new client option - also in BE
+    add `create client` option - also in BE
 
-    add view/search receipts page
 
-    add receipt info page
-
-    improve editUser and editClient/clientInfo to be more GUI friendly and show all fields
+    improve `editUser` to be more GUI friendly and show all fields
         - only allows admins to 'edit'
 
     mess around with the CSS

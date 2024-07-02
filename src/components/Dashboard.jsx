@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Logout from './Logout';
+import RequestList from './RequestList';
 
 const Dashboard = () => {
   const userType = useSelector((state) => state.auth.userType);
@@ -16,9 +17,9 @@ const Dashboard = () => {
       </nav>
 
       <div className="container mt-4">
-        <div className="card outer-card">
+        <div className="card outer-card mb-4">
           <div className="card-header text-center">
-            Signed in with permission level: {userType}
+            Signed in with permission level: <br></br> {userType}
           </div>
 
           <div className="card-body">
@@ -58,16 +59,26 @@ const Dashboard = () => {
                 </div>
               )}
               <div className="col-sm-6 mb-4">
-              <Link to="/receiptList" className="card-link">
-                <div className="card inner-card">
-                  <div className="card-body d-flex justify-content-between align-items-center">
-                    <h5 className="card-title mb-0">Receipts</h5>
-                    <img src="/receipt_log_button_icon.png" alt="Receipt log icon" className="card-icon" />
+                <Link to="/receiptList" className="card-link">
+                  <div className="card inner-card">
+                    <div className="card-body d-flex justify-content-between align-items-center">
+                      <h5 className="card-title mb-0">Receipts</h5>
+                      <img src="/receipt_log_button_icon.png" alt="Receipt log icon" className="card-icon" />
+                    </div>
                   </div>
-                </div>
-              </Link>
+                </Link>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Embedded RequestList */}
+        <div className="card outer-card">
+          <div className="card-header text-center">
+            <h5>Recent Requests</h5>
+          </div>
+          <div className="card-body">
+            <RequestList embedded={true} />
           </div>
         </div>
       </div>

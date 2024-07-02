@@ -1,6 +1,9 @@
 // App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { loginSuccess } from './redux/actions/authActions';
 import { useSelector } from 'react-redux';
 import Index from './components/Index';
 import Login from './components/Login';
@@ -14,9 +17,8 @@ import EditUser from './components/EditUser';
 import PrivateRoute from './components/PrivateRoute.jsx';
 import ReceiptList from './components/ReceiptList';
 import ReceiptInfo from './components/ReceiptInfo';
-import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { loginSuccess } from './redux/actions/authActions';
+import RequestList from './components/RequestList';
+
 
 function App() {
   const dispatch = useDispatch();
@@ -45,6 +47,7 @@ function App() {
         <Route path="*" element={<Navigate to={userType ? '/dashboard' : '/login'} />} />
         <Route path="/receiptList" element={<ReceiptList />} />
         <Route path="/receiptInfo/:receiptID" element={<ReceiptInfo />} />
+        <Route path="/requestList" element={<RequestList />} />
       </Routes>
     </Router>
   );
