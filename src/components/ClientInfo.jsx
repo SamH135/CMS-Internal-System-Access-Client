@@ -82,6 +82,45 @@ const ClientInfo = () => {
     return dateString ? dateString.split('T')[0] : '';
   };
 
+  const renderMetalDistribution = () => {
+    if (!client || !metals) return null;
+
+    if (client.clienttype !== 'insulation') {
+      return (
+        <div className="card mb-4">
+          <div className="card-header">
+            <h5>Metal Distribution</h5>
+          </div>
+          <div className="card-body">
+            <GenericPieChart data={metals} title="Metal Distribution" />
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  const renderClientTotals = () => {
+    return (
+      <div className="card mb-4">
+        <div className="card-header">
+          <h5>Client Totals</h5>
+        </div>
+        <div className="card-body">
+          {Object.entries(metals).map(([key, value]) => (
+            <p key={key}>{key}: {parseFloat(value).toFixed(2)} lbs</p>
+          ))}
+          <p>Total Payout: ${parseFloat(totals.totalpayout).toFixed(2)}</p>
+          <p>Last Pickup Date: {new Date(totals.lastpickupdate).toLocaleDateString()}</p>
+          <p>Days Since Last Pickup: {daysSinceLastPickup()}</p>
+          <p>Days Overdue for Pickup: {daysOverdue()}</p>
+          <p>Needs Pickup: {client.needspickup ? 'Yes' : 'No'}</p>
+        </div>
+      </div>
+    );
+  };
+
   if (!client || !metals || !totals) {
     return <div>Loading...</div>;
   }
@@ -98,58 +137,18 @@ const ClientInfo = () => {
       </nav>
 
       <div className="container mt-4">
-      <h1 className="text-center mb-4">{client.clientname}</h1>
+        <h1 className="text-center mb-4">{client.clientname}</h1>
         <div className="row">
           <div className="col-md-6">
-            {client.clienttype !== 'insulation' ? (
-              <div className="card mb-4">
-                <div className="card-header">
-                  <h5>Metal Distribution</h5>
-                </div>
-                <div className="card-body">
-                  <GenericPieChart data={metals} />
-                </div>
-              </div>
-            ) : (
-              <div className="card mb-4">
-                <div className="card-header">
-                  <h5>Insulation Data</h5>
-                </div>
-                <div className="card-body">
-                  <p>Steel Shred: {metals["Steel Shred"] || 0} lbs</p>
-                  <p>Loads of Trash: {metals["Loads of Trash"] || 0}</p>
-                </div>
-              </div>
-            )}
-            <div className="card mb-4">
-              <div className="card-header">
-                <h5>Client Totals</h5>
-              </div>
-              <div className="card-body">
-                {client.clienttype !== 'insulation' ? (
-                  <>
-                    <p>Total Volume: {totals.totalvolume} lbs</p>
-                    <p>Total Payout: ${totals.totalpayout}</p>
-                  </>
-                ) : (
-                  <>
-                    <p>Steel Shred: {metals["Steel Shred"] || 0} lbs</p>
-                    <p>Loads of Trash: {metals["Loads of Trash"] || 0}</p>
-                  </>
-                )}
-                <p>Last Pickup Date: {new Date(totals.lastpickupdate).toLocaleDateString()}</p>
-                <p>Days Since Last Pickup: {daysSinceLastPickup()}</p>
-                <p>Days Overdue for Pickup: {daysOverdue()}</p>
-                <p>Needs Pickup: {client.needspickup ? 'Yes' : 'No'}</p>
-              </div>
-            </div>
+            {renderMetalDistribution()}
+            {renderClientTotals()}
           </div>
           <div className="col-md-6">
             <div className="card">
               <div className="card-header d-flex justify-content-between align-items-center">
-              <div className="w-100 text-center">
-                <h5>Client Information</h5>
-              </div>
+                <div className="w-100 text-center">
+                  <h5>Client Information</h5>
+                </div>
                 {isAdmin && (
                   <button className="btn btn-primary" onClick={() => setIsEditing(!isEditing)}>
                     {isEditing ? 'Cancel' : 'Edit'}

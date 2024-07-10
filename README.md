@@ -98,12 +98,17 @@ HOW TO RUN:
     npm start
 
 
-THINGS TO DO:
+TO-DO:
 
+    add 'setMetalPrices' page to allow admins to set predefined prices that are sent to receipts based on client type when receipts are being made
 
-    add `view requests` page - maybe to dashboard or routes
+    add 'delete requests' option to request page (maybe also add number of unresloved requests)
+
+    change PickupInfo to have displays for pickups today, pickups this week, pickups this month, and when you search a client it shows the last pickup date more easily
 
     add `create client` option - also in BE
+
+    LOW PRIORITY: add 'data analytics' page to search/rank clients by different metal volumes
 
 
     improve `editUser` to be more GUI friendly and show all fields

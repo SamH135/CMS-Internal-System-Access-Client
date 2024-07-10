@@ -42,32 +42,8 @@ const ReceiptInfo = () => {
   const renderMetalDistribution = () => {
     if (!receipt || !metals) return null;
 
-    if (receipt.clienttype === 'auto' || receipt.clienttype === 'hvac') {
-      let allMetals = {};
-      
-      if (receipt.clienttype === 'auto') {
-        allMetals = {
-          "Drums & Rotors": parseFloat(metals.drumsrotorsweight) || 0,
-          "Short Iron": parseFloat(metals.shortironweight) || 0,
-          "Steel Shred": parseFloat(metals.steelshredweight) || 0,
-          "Aluminum Radiators": parseFloat(metals.aluminumradiatorsweight) || 0,
-          "Brass/Copper Radiators": parseFloat(metals.brasscoperradiatorsweight) || 0,
-          "Aluminum": parseFloat(metals.aluminumweight) || 0,
-          "Batteries": parseFloat(metals.batteriesweight) || 0
-        };
-      } else if (receipt.clienttype === 'hvac') {
-        allMetals = {
-          "Steel Shred": parseFloat(metals.steelshredweight) || 0,
-          "Copper": parseFloat(metals.copperweight) || 0,
-          "Brass": parseFloat(metals.brassweight) || 0,
-          "Compressors": parseFloat(metals.compressorsweight) || 0,
-          "Copper Coils": parseFloat(metals.coppercoilsweight) || 0,
-          "Aluminum Coils": parseFloat(metals.aluminumcoilsweight) || 0,
-          "Wire": parseFloat(metals.wireweight) || 0,
-          "Brass/Copper Breakage": parseFloat(metals.brasscopperbreakageweight) || 0,
-          "Electric Motors": parseFloat(metals.electricmotorsweight) || 0
-        };
-      }
+    if (receipt.clienttype !== 'insulation') {
+      let allMetals = { ...metals };
       
       // Include custom metals in the distribution
       customMetals.forEach(metal => {
@@ -82,7 +58,7 @@ const ReceiptInfo = () => {
             <h5>Metal Distribution</h5>
           </div>
           <div className="card-body">
-            <GenericPieChart data={allMetals} />
+            <GenericPieChart data={allMetals} title="Metal Distribution" />
           </div>
         </div>
       );
@@ -91,60 +67,65 @@ const ReceiptInfo = () => {
     return null;
   };
 
-  const renderLeftColumn = () => {
-    if (receipt.clienttype === 'insulation') {
-      return (
-        <div className="card mb-4">
-          <div className="card-header">
-            <h5>Insulation Materials</h5>
-          </div>
-          <div className="card-body">
-            <p>Steel Shred: {formatWeight(metals.steelshredweight)}</p>
-            <p>Loads of Trash: {metals.loadsoftrash || 0}</p>
-          </div>
+  const renderMetalDetails = () => {
+    if (!metals) return null;
+
+    return (
+      <div className="card mb-4">
+        <div className="card-header">
+          <h5>Metal Details</h5>
         </div>
-      );
-    } else {
-      return (
-        <>
-          {renderMetalDistribution()}
-          {customMetals.length > 0 && (
-            <div className="card mb-4">
-              <div className="card-header">
-                <h5>Custom Metals</h5>
-              </div>
-              <div className="card-body">
-                <Table
-                  columns={[
-                    { header: 'Metal Name', field: 'metalname' },
-                    { header: 'Weight', field: 'weight', formatter: formatWeight },
-                    { header: 'Price', field: 'price', formatter: formatCurrency },
-                  ]}
-                  data={customMetals}
-                />
-              </div>
-            </div>
-          )}
-          {receipt.clienttype === 'auto' && catalyticConverters.length > 0 && (
-            <div className="card mb-4">
-              <div className="card-header">
-                <h5>Catalytic Converters</h5>
-              </div>
-              <div className="card-body">
-                <Table
-                  columns={[
-                    { header: 'Part Number', field: 'partnumber' },
-                    { header: 'Price', field: 'price', formatter: formatCurrency },
-                    { header: 'Percent Full', field: 'percentfull', formatter: (value) => `${parseFloat(value).toFixed(2)}%` },
-                  ]}
-                  data={catalyticConverters}
-                />
-              </div>
-            </div>
-          )}
-        </>
-      );
-    }
+        <div className="card-body">
+          {Object.entries(metals).map(([key, value]) => (
+            <p key={key}>{key}: {formatWeight(value)}</p>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderCustomMetals = () => {
+    if (customMetals.length === 0) return null;
+
+    return (
+      <div className="card mb-4">
+        <div className="card-header">
+          <h5>Custom Metals</h5>
+        </div>
+        <div className="card-body">
+          <Table
+            columns={[
+              { header: 'Metal Name', field: 'metalname' },
+              { header: 'Weight', field: 'weight', formatter: formatWeight },
+              { header: 'Price', field: 'price', formatter: formatCurrency },
+            ]}
+            data={customMetals}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  const renderCatalyticConverters = () => {
+    if (receipt?.clienttype !== 'auto' || catalyticConverters.length === 0) return null;
+
+    return (
+      <div className="card mb-4">
+        <div className="card-header">
+          <h5>Catalytic Converters</h5>
+        </div>
+        <div className="card-body">
+          <Table
+            columns={[
+              { header: 'Part Number', field: 'partnumber' },
+              { header: 'Price', field: 'price', formatter: formatCurrency },
+              { header: 'Percent Full', field: 'percentfull', formatter: (value) => `${parseFloat(value).toFixed(2)}%` },
+            ]}
+            data={catalyticConverters}
+          />
+        </div>
+      </div>
+    );
   };
 
   const formatCurrency = (value) => {
@@ -174,7 +155,10 @@ const ReceiptInfo = () => {
         <h1 className="text-center mb-4">Receipt for {receipt.clientname}</h1>
         <div className="row">
           <div className="col-md-6">
-            {renderLeftColumn()}
+            {renderMetalDistribution()}
+            {renderMetalDetails()}
+            {renderCustomMetals()}
+            {renderCatalyticConverters()}
           </div>
           <div className="col-md-6">
             <div className="card mb-4">
@@ -183,11 +167,15 @@ const ReceiptInfo = () => {
               </div>
               <div className="card-body">
                 <p>Receipt ID: {receipt.receiptid}</p>
+                <p>Client ID: {receipt.clientid}</p>
+                <p>Client Name: {receipt.clientname}</p>
+                <p>Client Type: {receipt.clienttype}</p>
                 <p>Payment Method: {receipt.paymentmethod || 'N/A'}</p>
                 <p>Total Volume: {formatWeight(receipt.totalvolume)}</p>
                 <p>Total Payout: {formatCurrency(receipt.totalpayout)}</p>
                 <p>Pickup Date: {new Date(receipt.pickupdate).toLocaleDateString()}</p>
                 <p>Pickup Time: {new Date(receipt.pickuptime).toLocaleTimeString()}</p>
+                <p>Created By: {receipt.createdby}</p>
               </div>
             </div>
           </div>
