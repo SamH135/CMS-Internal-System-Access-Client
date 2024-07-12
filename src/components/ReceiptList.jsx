@@ -5,6 +5,11 @@ import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
 import Table from './Table';
 
+const formatDate = (dateString) => {
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+};
+
 const ReceiptList = () => {
   const token = useSelector((state) => state.auth.token);
   const [receipts, setReceipts] = useState([]);
@@ -88,10 +93,13 @@ const ReceiptList = () => {
               columns={[
                 { header: 'Receipt ID', field: 'receiptid' },
                 { header: 'Client Name', field: 'clientname' },
-                { header: 'Pickup Date', field: 'pickupdate', formatter: (value) => new Date(value).toLocaleDateString() },
+                { header: 'Pickup Date', field: 'pickupdate' },
                 { header: 'Total Payout', field: 'totalpayout', formatter: (value) => `$${value.toFixed(2)}` },
               ]}
-              data={receipts}
+              data={receipts.map((receipt) => ({
+                ...receipt,
+                pickupdate: formatDate(receipt.pickupdate),
+              }))}
               onRowClick={(receipt) => handleReceiptClick(receipt.receiptid)}
             />
           </div>

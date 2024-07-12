@@ -26,6 +26,7 @@ const ClientInfo = () => {
         ]);
         setClient(clientResponse.data.client);
         setMetals(metalsResponse.data.metals);
+        console.log('Metals data from API:', metalsResponse.data.metals);
         setTotals(totalsResponse.data.totals);
       } catch (error) {
         console.error('Error retrieving client data:', error);
@@ -84,8 +85,24 @@ const ClientInfo = () => {
 
   const renderMetalDistribution = () => {
     if (!client || !metals) return null;
-
-    if (client.clienttype !== 'insulation') {
+  
+    if (client.clienttype === 'insulation') {
+      const feeData = {
+        'Dump Fees': parseFloat(metals['Dump Fees'] || 0),
+        'Haul Fees': parseFloat(metals['Haul Fees'] || 0)
+      };
+      return (
+        <div className="card mb-4">
+          <div className="card-header">
+            <h5>Fee Distribution</h5>
+          </div>
+          <div className="card-body">
+            <GenericPieChart data={feeData} title="Fee Distribution" />
+          </div>
+        </div>
+      );
+    } else {
+      // Existing code for other client types
       return (
         <div className="card mb-4">
           <div className="card-header">
@@ -97,8 +114,33 @@ const ClientInfo = () => {
         </div>
       );
     }
+  };
 
-    return null;
+  const renderPickupInfo = () => {
+    return (
+      <div className="card mb-4">
+        <div className="card-header">
+          <h5>Pickup Information</h5>
+        </div>
+        <div className="card-body">
+          <p>Last Pickup Date: {totals.lastpickupdate ? new Date(totals.lastpickupdate).toLocaleDateString() : 'N/A'}</p>
+          <p>Days Since Last Pickup: {daysSinceLastPickup()}</p>
+          <p>Days Overdue for Pickup: {daysOverdue()}</p>
+          <p>
+            Needs Pickup:{" "}
+            <span 
+              className={`fw-bold ${client.needspickup ? 'bg-danger text-white' : ''}`}
+              style={{
+                padding: '2px 6px',
+                borderRadius: '4px',
+              }}
+            >
+              {client.needspickup ? 'Yes' : 'No'}
+            </span>
+          </p>
+        </div>
+      </div>
+    );
   };
 
   const renderClientTotals = () => {
@@ -108,14 +150,17 @@ const ClientInfo = () => {
           <h5>Client Totals</h5>
         </div>
         <div className="card-body">
-          {Object.entries(metals).map(([key, value]) => (
-            <p key={key}>{key}: {parseFloat(value).toFixed(2)} lbs</p>
-          ))}
-          <p>Total Payout: ${parseFloat(totals.totalpayout).toFixed(2)}</p>
-          <p>Last Pickup Date: {new Date(totals.lastpickupdate).toLocaleDateString()}</p>
-          <p>Days Since Last Pickup: {daysSinceLastPickup()}</p>
-          <p>Days Overdue for Pickup: {daysOverdue()}</p>
-          <p>Needs Pickup: {client.needspickup ? 'Yes' : 'No'}</p>
+          {client.clienttype === 'insulation' ? (
+            <>
+              <p>Total Dump Fees: ${parseFloat(metals['Dump Fees'] || 0).toFixed(2)}</p>
+              <p>Total Haul Fees: ${parseFloat(metals['Haul Fees'] || 0).toFixed(2)}</p>
+            </>
+          ) : (
+            Object.entries(metals).map(([key, value]) => (
+              <p key={key}>{key}: {parseFloat(value).toFixed(2)} lbs</p>
+            ))
+          )}
+          <p>Total Payout: ${parseFloat(totals.totalpayout || 0).toFixed(2)}</p>
         </div>
       </div>
     );
@@ -142,6 +187,7 @@ const ClientInfo = () => {
           <div className="col-md-6">
             {renderMetalDistribution()}
             {renderClientTotals()}
+            {renderPickupInfo()}
           </div>
           <div className="col-md-6">
             <div className="card">

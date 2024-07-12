@@ -25,6 +25,7 @@ const ReceiptInfo = () => {
         console.log('Receipt data:', receiptResponse.data);
         setReceipt(receiptResponse.data.receipt);
         setMetals(metalsResponse.data.metals);
+        console.log('Metals data from API:', metalsResponse.data.metals);
         setCustomMetals(receiptResponse.data.customMetals);
         setCatalyticConverters(receiptResponse.data.catalyticConverters);
       } catch (error) {
@@ -41,8 +42,24 @@ const ReceiptInfo = () => {
 
   const renderMetalDistribution = () => {
     if (!receipt || !metals) return null;
-
-    if (receipt.clienttype !== 'insulation') {
+  
+    if (receipt.clienttype === 'insulation') {
+      const feeData = {
+        'Dump Fee': parseFloat(metals['Dump Fee'] || 0),
+        'Haul Fee': parseFloat(metals['Haul Fee'] || 0)
+      };
+      return (
+        <div className="card mb-4">
+          <div className="card-header">
+            <h5>Fee Distribution</h5>
+          </div>
+          <div className="card-body">
+            <GenericPieChart data={feeData} title="Fee Distribution" />
+          </div>
+        </div>
+      );
+    } else {
+      // Existing code for other client types
       let allMetals = { ...metals };
       
       // Include custom metals in the distribution
@@ -51,7 +68,7 @@ const ReceiptInfo = () => {
           allMetals[metal.metalname] = parseFloat(metal.weight);
         }
       });
-
+  
       return (
         <div className="card mb-4">
           <div className="card-header">
@@ -63,22 +80,27 @@ const ReceiptInfo = () => {
         </div>
       );
     }
-
-    return null;
   };
 
   const renderMetalDetails = () => {
     if (!metals) return null;
-
+  
     return (
       <div className="card mb-4">
         <div className="card-header">
-          <h5>Metal Details</h5>
+          <h5>{receipt.clienttype === 'insulation' ? 'Fee Details' : 'Metal Details'}</h5>
         </div>
         <div className="card-body">
-          {Object.entries(metals).map(([key, value]) => (
-            <p key={key}>{key}: {formatWeight(value)}</p>
-          ))}
+          {receipt.clienttype === 'insulation' ? (
+            <>
+              <p>Dump Fee: {formatCurrency(metals['Dump Fee'])}</p>
+              <p>Haul Fee: {formatCurrency(metals['Haul Fee'])}</p>
+            </>
+          ) : (
+            Object.entries(metals).map(([key, value]) => (
+              <p key={key}>{key}: {formatWeight(value)}</p>
+            ))
+          )}
         </div>
       </div>
     );

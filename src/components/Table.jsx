@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Table = ({ columns, data, onRowClick }) => {
   return (
-    <table className="table table-hover" style={{ borderRadius: '6px', overflow: 'hidden' }}>
+    <table className="table table-hover table-success" style={{ borderRadius: '6px', overflow: 'hidden' }}>
       <thead>
         <tr>
           {columns.map((column, index) => (

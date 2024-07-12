@@ -204,9 +204,9 @@ th {
 }
 
 /* Hover effect */
-tr:hover td {
+/* tr:hover td {
   background-color: #b3cdfb;
-}
+} */
 
 /* Form styles */
 form {

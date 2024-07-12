@@ -98,7 +98,7 @@ HOW TO RUN:
     npm start
 
 
-TO-DO:
+ISAC TO-DO:
 
     add 'setMetalPrices' page to allow admins to set predefined prices that are sent to receipts based on client type when receipts are being made
 

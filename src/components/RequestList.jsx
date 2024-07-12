@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
-//import { Link, useNavigate } from 'react-router-dom';
-
 import { useNavigate } from 'react-router-dom';
-
 import { useSelector } from 'react-redux';
 import { jwtDecode } from 'jwt-decode';
 import axiosInstance from '../axiosInstance';
-// import Logout from './Logout';
 import Table from './Table';
+
+const formatDate = (dateString) => {
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+};
 
 const RequestList = () => {
   const token = useSelector((state) => state.auth.token);
@@ -60,20 +61,8 @@ const RequestList = () => {
 
   return (
     <div>
-      {/* <nav>
-        <h4>Request Management System</h4>
-        <ul>
-          <li><Link to="/dashboard">Dashboard</Link></li>
-          <li><Logout /></li>
-        </ul>
-      </nav> */}
-
       <div className="container mt-4">
         <div className="card">
-          {/* <div className="card-header text-center d-flex justify-content-center align-items-center">
-            <img src="/request_list_icon.png" alt="Request icon" className="card-icon me-2" />
-            <strong>Request List</strong>
-          </div> */}
           <div className="card-body">
             <div className="search-container">
               <input 
@@ -108,10 +97,8 @@ const RequestList = () => {
             </div>
             <Table
               columns={[
-                { header: 'Request ID', field: 'requestid' },
                 { header: 'Client Name', field: 'clientname' },
-                { header: 'Request Date', field: 'requestdate', render: (date) => new Date(date).toLocaleDateString() },
-                { header: 'Number of Barrels', field: 'numfullbarrels' },
+                { header: 'Request Date', field: 'requestdate' },
                 { header: 'Actions', field: 'actions', render: (_, request) => (
                   isAdmin && (
                     <img 
@@ -126,7 +113,10 @@ const RequestList = () => {
                   )
                 )}
               ]}
-              data={requests}
+              data={requests.map(request => ({
+                ...request,
+                requestdate: formatDate(request.requestdate)
+              }))}
               onRowClick={(request) => navigate(`/requestInfo/${request.requestid}`)}
             />
           </div>
