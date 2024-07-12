@@ -15,17 +15,18 @@ const RequestList = () => {
   const [requests, setRequests] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('asc');
+  const [selectedRequests, setSelectedRequests] = useState([]);
   const navigate = useNavigate();
   const isAdmin = token ? jwtDecode(token).userType === 'admin' : false;
 
   const fetchRequests = useCallback(async () => {
     try {
-      const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/requests?sortOrder=${sortOrder}`);
+      const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/requests?sortOrder=${sortOrder}&searchTerm=${encodeURIComponent(searchTerm)}`);
       setRequests(response.data.requests);
     } catch (error) {
       console.error('Error retrieving requests:', error);
     }
-  }, [sortOrder]);
+  }, [sortOrder, searchTerm]);
 
   useEffect(() => {
     if (!token) {
@@ -34,23 +35,25 @@ const RequestList = () => {
       fetchRequests();
     }
   }, [token, navigate, fetchRequests]);
-  
-  const handleSearch = async () => {
-    try {
-      const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/requests?searchTerm=${encodeURIComponent(searchTerm)}&sortOrder=${sortOrder}`);
-      setRequests(response.data.requests);
-    } catch (error) {
-      console.error('Error searching requests:', error);
-    }
+
+  const handleSearch = () => {
+    fetchRequests();
   };
 
-  const handleDeleteRequest = async (requestID) => {
-    if (window.confirm('Are you sure you want to delete this request?')) {
+  const handleDeleteSelectedRequests = async () => {
+    if (selectedRequests.length === 0) {
+      alert("No requests selected");
+      return;
+    }
+    if (window.confirm(`Are you sure you want to delete ${selectedRequests.length} selected request(s)?`)) {
       try {
-        await axiosInstance.delete(`${process.env.REACT_APP_API_URL}/api/requests?searchTerm=${requestID}`);
-        fetchRequests(); // Refresh the list after deletion
+        await axiosInstance.delete(`${process.env.REACT_APP_API_URL}/api/deleteRequests`, {
+          data: { requestIDs: selectedRequests }
+        });
+        setSelectedRequests([]);
+        fetchRequests();
       } catch (error) {
-        console.error('Error deleting request:', error);
+        console.error('Error deleting selected requests:', error);
       }
     }
   };
@@ -58,6 +61,31 @@ const RequestList = () => {
   const toggleSortOrder = () => {
     setSortOrder(prevOrder => prevOrder === 'asc' ? 'desc' : 'asc');
   };
+
+  const handleSelectRequest = (requestID) => {
+    setSelectedRequests(prev => 
+      prev.includes(requestID) 
+        ? prev.filter(id => id !== requestID)
+        : [...prev, requestID]
+    );
+  };
+
+  const columns = [
+    ...(isAdmin ? [{
+      header: 'Select',
+      field: 'select',
+      render: (value, request) => (
+        <input 
+          type="checkbox" 
+          checked={selectedRequests.includes(request.requestid)}
+          onChange={() => handleSelectRequest(request.requestid)}
+          onClick={(e) => e.stopPropagation()}
+        />
+      )
+    }] : []),
+    { header: 'Client Name', field: 'clientname' },
+    { header: 'Request Date', field: 'requestdate' }
+  ];
 
   return (
     <div>
@@ -90,29 +118,22 @@ const RequestList = () => {
                 }}
               />
             </div>
-            <div className="d-flex justify-content-end mb-2">
+            <div className="d-flex justify-content-between mb-2">
               <button className="btn btn-secondary" onClick={toggleSortOrder}>
                 Sort by Date {sortOrder === 'asc' ? '↑' : '↓'}
               </button>
+              {isAdmin && (
+                <button 
+                  className="btn btn-danger" 
+                  onClick={handleDeleteSelectedRequests}
+                  disabled={selectedRequests.length === 0}
+                >
+                  Delete Selected ({selectedRequests.length})
+                </button>
+              )}
             </div>
             <Table
-              columns={[
-                { header: 'Client Name', field: 'clientname' },
-                { header: 'Request Date', field: 'requestdate' },
-                { header: 'Actions', field: 'actions', render: (_, request) => (
-                  isAdmin && (
-                    <img 
-                      src="/close_button_icon.png" 
-                      alt="Delete" 
-                      className="delete-icon" 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteRequest(request.requestid);
-                      }}
-                    />
-                  )
-                )}
-              ]}
+              columns={columns}
               data={requests.map(request => ({
                 ...request,
                 requestdate: formatDate(request.requestdate)
