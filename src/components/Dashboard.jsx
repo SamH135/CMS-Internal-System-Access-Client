@@ -14,7 +14,6 @@ const Dashboard = () => {
         <h4>Client Management System</h4>
         <ul>
           <li><Logout /></li>
-          <li><TestSessionExpireButton /></li>
         </ul>
       </nav>
 
