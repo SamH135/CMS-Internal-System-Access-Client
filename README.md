@@ -100,19 +100,19 @@ HOW TO RUN:
 
 ISAC TO-DO:
 
-    add 'setMetalPrices' page to allow admins to set predefined prices that are sent to receipts based on client type when receipts are being made
+    1. add 'setMetalPrices' page to allow admins to set predefined prices that are sent to receipts based on client type when receipts are being made
 
-    add 'delete requests' option to request page (maybe also add number of unresloved requests)
+    2. change PickupInfo to have displays for pickups today, pickups this week, pickups this month, and when you search a client it shows the last pickup date more easily
 
-    change PickupInfo to have displays for pickups today, pickups this week, pickups this month, and when you search a client it shows the last pickup date more easily
+    3. add `create client` option - also in BE
 
-    add `create client` option - also in BE
-
-    LOW PRIORITY: add 'data analytics' page to search/rank clients by different metal volumes
+    4. fix `edit user` option - also in BE
 
 
-    improve `editUser` to be more GUI friendly and show all fields
-        - only allows admins to 'edit'
+
+    LOW PRIORITY: 
+    
+    add 'data analytics' page to search/rank clients by different metal volumes
 
     mess around with the CSS
 

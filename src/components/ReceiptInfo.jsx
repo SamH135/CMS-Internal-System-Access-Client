@@ -5,6 +5,7 @@ import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
 import GenericPieChart from './GenericPieChart';
 import Table from './Table';
+import BackArrow from './BackArrow';
 
 const ReceiptInfo = () => {
   const [receipt, setReceipt] = useState(null);
@@ -174,7 +175,17 @@ const ReceiptInfo = () => {
       </nav>
 
       <div className="container mt-4">
-        <h1 className="text-center mb-4">Receipt for {receipt.clientname}</h1>
+        <div className="text-center">
+          <h1 className="mb-4 d-inline-flex align-items-center">
+            <BackArrow />
+            <span className="ms-2">
+              {receipt.clientname} 
+              <span className="ms-2">
+                ({receipt.clienttype})
+              </span>
+            </span>
+          </h1>
+        </div>
         <div className="row">
           <div className="col-md-6">
             {renderMetalDistribution()}

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Logout from './Logout';
 import RequestList from './RequestList';
+import TestSessionExpireButton from './TestSessionExpireButton';
 
 const Dashboard = () => {
   const userType = useSelector((state) => state.auth.userType);
@@ -13,6 +14,7 @@ const Dashboard = () => {
         <h4>Client Management System</h4>
         <ul>
           <li><Logout /></li>
+          <li><TestSessionExpireButton /></li>
         </ul>
       </nav>
 

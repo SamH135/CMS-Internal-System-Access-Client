@@ -1,7 +1,7 @@
 // App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from './redux/actions/authActions';
 import { useSelector } from 'react-redux';
@@ -18,11 +18,13 @@ import PrivateRoute from './components/PrivateRoute.jsx';
 import ReceiptList from './components/ReceiptList';
 import ReceiptInfo from './components/ReceiptInfo';
 import RequestList from './components/RequestList';
+import SessionExpiredModal from './components/SessionExpiredModal';
 
 
 function App() {
   const dispatch = useDispatch();
   const userType = useSelector((state) => state.auth.userType);
+  const [showSessionExpiredModal, setShowSessionExpiredModal] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -30,10 +32,24 @@ function App() {
     if (token && storedUserType) {
       dispatch(loginSuccess(token, storedUserType));
     }
+
+    const handleSessionExpired = () => {
+      setShowSessionExpiredModal(true);
+    };
+
+    window.addEventListener('sessionExpired', handleSessionExpired);
+
+    return () => {
+      window.removeEventListener('sessionExpired', handleSessionExpired);
+    };
   }, [dispatch]);
 
   return (
     <Router>
+      <SessionExpiredModal
+        show={showSessionExpiredModal}
+        onHide={() => setShowSessionExpiredModal(false)}
+      />
       <Routes>
         <Route exact path="/" element={<Index />} />
         <Route path="/login" element={<Login />} />

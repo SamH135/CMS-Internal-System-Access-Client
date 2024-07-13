@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosInstance';
 import Table from './Table';
+import BackArrow from './BackArrow';
 
 const formatDate = (dateString) => {
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -46,6 +47,7 @@ const PickupInfo = () => {
       </nav>
 
       <div className="container mt-4">
+      <BackArrow />
         <div className="card">
           <div className="card-header text-center d-flex justify-content-center align-items-center">
             <img src="/route_info_button_icon.png" alt="Pickup info icon" className="card-icon me-2" />

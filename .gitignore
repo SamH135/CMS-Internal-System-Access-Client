@@ -12,6 +12,7 @@
 /build
 
 # misc
+TestSessionExpireButton.jsx
 .DS_Store
 .env
 .env.development

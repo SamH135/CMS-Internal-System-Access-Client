@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
 import Table from './Table';
+import BackArrow from './BackArrow';
 
 const ClientList = () => {
   const token = useSelector((state) => state.auth.token);
@@ -52,7 +53,9 @@ const ClientList = () => {
       </nav>
 
       <div className="container mt-4">
+      <BackArrow />
         <div className="card">
+          
           <div className="card-header text-center d-flex justify-content-center align-items-center">
             <img src="/client_list_button_icon.png" alt="Client icon" className="card-icon me-2" />
             <strong>Client List</strong>

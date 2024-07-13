@@ -5,6 +5,7 @@ import { jwtDecode } from 'jwt-decode';
 import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
 import Table from './Table';
+import BackArrow from './BackArrow';
 
 const UserDashboard = () => {
   const [users, setUsers] = useState([]);
@@ -73,6 +74,7 @@ const UserDashboard = () => {
       </nav>
 
       <div className="container mt-4">
+      <BackArrow />
         <div className="card">
           <div className="card-header text-center d-flex justify-content-center align-items-center">
             <img src="/manage_accounts_button_icon.png" alt="User dashboard icon" className="card-icon me-2" />

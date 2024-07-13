@@ -5,6 +5,7 @@ import { jwtDecode } from 'jwt-decode';
 import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
 import GenericPieChart from './GenericPieChart';
+import BackArrow from './BackArrow';
 
 const ClientInfo = () => {
   const [client, setClient] = useState(null);
@@ -182,7 +183,18 @@ const ClientInfo = () => {
       </nav>
 
       <div className="container mt-4">
-        <h1 className="text-center mb-4">{client.clientname}</h1>
+        
+      <div className="text-center">
+        <h1 className="mb-4 d-inline-flex align-items-center">
+          <BackArrow />
+          <span className="ms-2">
+            {client.clientname} 
+            <span className="ms-2">
+              ({client.clienttype})
+            </span>
+          </span>
+        </h1>
+      </div>
         <div className="row">
           <div className="col-md-6">
             {renderMetalDistribution()}

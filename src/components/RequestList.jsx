@@ -45,7 +45,7 @@ const RequestList = () => {
       alert("No requests selected");
       return;
     }
-    if (window.confirm(`Are you sure you want to delete ${selectedRequests.length} selected request(s)?`)) {
+    if (window.confirm(`Are you sure you want to delete ${selectedRequests.length} selected request(s)? \nNOTE: requests are deleted automatically when a new receipt is made for that client.`)) {
       try {
         await axiosInstance.delete(`${process.env.REACT_APP_API_URL}/api/deleteRequests`, {
           data: { requestIDs: selectedRequests }

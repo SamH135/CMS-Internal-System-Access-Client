@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
 import Table from './Table';
+import BackArrow from './BackArrow';
 
 const formatDate = (dateString) => {
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -57,6 +58,7 @@ const ReceiptList = () => {
       </nav>
 
       <div className="container mt-4">
+      <BackArrow />
         <div className="card">
           <div className="card-header text-center d-flex justify-content-center align-items-center">
             <img src="/receipt_log_button_icon.png" alt="Receipt icon" className="card-icon me-2" />
