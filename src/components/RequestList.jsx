@@ -63,6 +63,7 @@ const RequestList = () => {
   };
 
   const handleSelectRequest = (e, requestID) => {
+    e.preventDefault(); // Prevent default behavior
     e.stopPropagation(); // Prevent row click event
     setSelectedRequests(prev => 
       prev.includes(requestID) 
@@ -76,11 +77,22 @@ const RequestList = () => {
       header: 'Select',
       field: 'select',
       render: (value, request) => (
-        <input 
-          type="checkbox" 
-          checked={selectedRequests.includes(request.requestid)}
-          onChange={(e) => handleSelectRequest(e, request.requestid)}
-        />
+        <div 
+          style={{ 
+            width: '30px', 
+            height: '30px', 
+            border: '1px solid #ccc', 
+            borderRadius: '4px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: selectedRequests.includes(request.requestid) ? '#007bff' : 'transparent'
+          }}
+        >
+          {selectedRequests.includes(request.requestid) && (
+            <span style={{ color: 'white', fontSize: '20px' }}>✓</span>
+          )}
+        </div>
       ),
       onCellClick: (e, row) => handleSelectRequest(e, row.requestid)
     }] : []),
