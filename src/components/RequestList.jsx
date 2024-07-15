@@ -62,7 +62,8 @@ const RequestList = () => {
     setSortOrder(prevOrder => prevOrder === 'asc' ? 'desc' : 'asc');
   };
 
-  const handleSelectRequest = (requestID) => {
+  const handleSelectRequest = (e, requestID) => {
+    e.stopPropagation(); // Prevent row click event
     setSelectedRequests(prev => 
       prev.includes(requestID) 
         ? prev.filter(id => id !== requestID)
@@ -78,14 +79,22 @@ const RequestList = () => {
         <input 
           type="checkbox" 
           checked={selectedRequests.includes(request.requestid)}
-          onChange={() => handleSelectRequest(request.requestid)}
-          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => handleSelectRequest(e, request.requestid)}
         />
-      )
+      ),
+      onCellClick: (e, row) => handleSelectRequest(e, row.requestid)
     }] : []),
     { header: 'Client Name', field: 'clientname' },
     { header: 'Request Date', field: 'requestdate' }
   ];
+
+  const handleRowClick = (row, e) => {
+    // Check if the click is on the checkbox or its container
+    if (!e.target.closest('td:first-child')) {
+      navigate(`/requestInfo/${row.requestid}`);
+    }
+  };
+
 
   return (
     <div>
@@ -138,7 +147,7 @@ const RequestList = () => {
                 ...request,
                 requestdate: formatDate(request.requestdate)
               }))}
-              onRowClick={(request) => navigate(`/requestInfo/${request.requestid}`)}
+              onRowClick={handleRowClick}
             />
           </div>
         </div>

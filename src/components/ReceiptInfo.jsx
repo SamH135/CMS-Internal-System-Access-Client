@@ -27,8 +27,8 @@ const ReceiptInfo = () => {
         setReceipt(receiptResponse.data.receipt);
         setMetals(metalsResponse.data.metals);
         console.log('Metals data from API:', metalsResponse.data.metals);
-        setCustomMetals(receiptResponse.data.customMetals);
-        setCatalyticConverters(receiptResponse.data.catalyticConverters);
+        setCustomMetals(receiptResponse.data.customMetals || []);
+        setCatalyticConverters(receiptResponse.data.catalyticConverters || []);
       } catch (error) {
         console.error('Error retrieving receipt data:', error);
       }
@@ -42,7 +42,7 @@ const ReceiptInfo = () => {
   }, [receiptID, token, navigate]);
 
   const renderMetalDistribution = () => {
-    if (!receipt || !metals) return null;
+    if (!receipt || !metals) return <p>No metal distribution data available.</p>;
   
     if (receipt.clienttype === 'insulation') {
       const feeData = {
@@ -55,28 +55,30 @@ const ReceiptInfo = () => {
             <h5>Fee Distribution</h5>
           </div>
           <div className="card-body">
-            <GenericPieChart data={feeData} title="Fee Distribution" />
+            <GenericPieChart data={feeData} />
           </div>
         </div>
       );
     } else {
-      // Existing code for other client types
-      let allMetals = { ...metals };
-      
-      // Include custom metals in the distribution
-      customMetals.forEach(metal => {
-        if (parseFloat(metal.weight) > 0) {
-          allMetals[metal.metalname] = parseFloat(metal.weight);
+      // Filter out zero values and undefined
+      const filteredMetals = Object.entries(metals).reduce((acc, [key, value]) => {
+        if (value && parseFloat(value) > 0) {
+          acc[key] = parseFloat(value);
         }
-      });
-  
+        return acc;
+      }, {});
+
+      if (Object.keys(filteredMetals).length === 0) {
+        return <p>No metal distribution data available.</p>;
+      }
+
       return (
         <div className="card mb-4">
           <div className="card-header">
             <h5>Metal Distribution</h5>
           </div>
           <div className="card-body">
-            <GenericPieChart data={allMetals} title="Metal Distribution" />
+            <GenericPieChart data={filteredMetals} />
           </div>
         </div>
       );
@@ -84,7 +86,7 @@ const ReceiptInfo = () => {
   };
 
   const renderMetalDetails = () => {
-    if (!metals) return null;
+    if (!metals) return <p>No metal details available.</p>;
   
     return (
       <div className="card mb-4">
@@ -159,7 +161,7 @@ const ReceiptInfo = () => {
     return value ? `${parseFloat(value).toFixed(2)} lbs` : 'N/A';
   };
 
-  if (!receipt || !metals) {
+  if (!receipt) {
     return <div>Loading...</div>;
   }
 
@@ -175,17 +177,8 @@ const ReceiptInfo = () => {
       </nav>
 
       <div className="container mt-4">
-        <div className="text-center">
-          <h1 className="mb-4 d-inline-flex align-items-center">
-            <BackArrow />
-            <span className="ms-2">
-              {receipt.clientname} 
-              <span className="ms-2">
-                ({receipt.clienttype})
-              </span>
-            </span>
-          </h1>
-        </div>
+        <BackArrow />
+        <h1 className="text-center mb-4">Receipt for {receipt.clientname}</h1>
         <div className="row">
           <div className="col-md-6">
             {renderMetalDistribution()}

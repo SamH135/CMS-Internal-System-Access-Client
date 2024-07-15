@@ -14,9 +14,9 @@ const Table = ({ columns, data, onRowClick }) => {
       </thead>
       <tbody>
         {data.map((row, index) => (
-          <tr key={index} onClick={() => onRowClick && onRowClick(row)}>
+          <tr key={index} onClick={(e) => onRowClick && onRowClick(row, e)}>
             {columns.map((column, columnIndex) => (
-              <td key={columnIndex}>
+              <td key={columnIndex} onClick={(e) => column.onCellClick && column.onCellClick(e, row)}>
                 {column.render ? column.render(row[column.field], row) : row[column.field]}
               </td>
             ))}

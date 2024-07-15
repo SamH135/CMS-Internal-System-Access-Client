@@ -19,12 +19,15 @@ import ReceiptList from './components/ReceiptList';
 import ReceiptInfo from './components/ReceiptInfo';
 import RequestList from './components/RequestList';
 import SessionExpiredModal from './components/SessionExpiredModal';
-
+import useInactivityCheck from './hooks/useInactivityCheck';
+// ... other imports
 
 function App() {
   const dispatch = useDispatch();
   const userType = useSelector((state) => state.auth.userType);
   const [showSessionExpiredModal, setShowSessionExpiredModal] = useState(false);
+
+  useInactivityCheck(); // Use the new hook
 
   useEffect(() => {
     const token = localStorage.getItem('token');
