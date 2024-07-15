@@ -1,4 +1,3 @@
-// src/components/Table.jsx
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -14,9 +13,9 @@ const Table = ({ columns, data, onRowClick }) => {
       </thead>
       <tbody>
         {data.map((row, index) => (
-          <tr key={index}>
+          <tr key={index} onClick={(e) => onRowClick(row, e)}>
             {columns.map((column, columnIndex) => (
-              <td key={columnIndex} onClick={(e) => column.onCellClick ? column.onCellClick(e, row) : onRowClick && onRowClick(row, e)}>
+              <td key={columnIndex} onClick={(e) => column.field === 'select' && e.stopPropagation()}>
                 {column.render ? column.render(row[column.field], row) : row[column.field]}
               </td>
             ))}

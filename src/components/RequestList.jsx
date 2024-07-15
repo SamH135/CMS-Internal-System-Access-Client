@@ -62,50 +62,43 @@ const RequestList = () => {
     setSortOrder(prevOrder => prevOrder === 'asc' ? 'desc' : 'asc');
   };
 
-  const handleSelectRequest = (e, requestID) => {
-    e.preventDefault(); // Prevent default behavior
-    e.stopPropagation(); // Prevent row click event
+  const handleSelectRequest = useCallback((requestID) => {
     setSelectedRequests(prev => 
       prev.includes(requestID) 
         ? prev.filter(id => id !== requestID)
         : [...prev, requestID]
     );
-  };
+  }, []);
 
   const columns = [
     ...(isAdmin ? [{
       header: 'Select',
       field: 'select',
       render: (value, request) => (
-        <div 
-          style={{ 
-            width: '30px', 
-            height: '30px', 
-            border: '1px solid #ccc', 
-            borderRadius: '4px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: selectedRequests.includes(request.requestid) ? '#007bff' : 'transparent'
-          }}
-        >
-          {selectedRequests.includes(request.requestid) && (
-            <span style={{ color: 'white', fontSize: '20px' }}>✓</span>
-          )}
+        <div style={{ padding: '10px' }}>
+          <input 
+            type="checkbox" 
+            checked={selectedRequests.includes(request.requestid)}
+            onChange={() => handleSelectRequest(request.requestid)}
+            style={{ 
+              width: '20px', 
+              height: '20px',
+              cursor: 'pointer'
+            }}
+          />
         </div>
       ),
-      onCellClick: (e, row) => handleSelectRequest(e, row.requestid)
     }] : []),
     { header: 'Client Name', field: 'clientname' },
     { header: 'Request Date', field: 'requestdate' }
   ];
 
-  const handleRowClick = (row, e) => {
+  const handleRowClick = useCallback((row, e) => {
     // Check if the click is on the checkbox or its container
     if (!e.target.closest('td:first-child')) {
       navigate(`/requestInfo/${row.requestid}`);
     }
-  };
+  }, [navigate]);
 
 
   return (
