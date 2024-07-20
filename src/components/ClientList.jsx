@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { jwtDecode } from 'jwt-decode';
 import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
 import Table from './Table';
-import BackArrow from './BackArrow';
 
 const ClientList = () => {
   const token = useSelector((state) => state.auth.token);
   const [clients, setClients] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
+  const isAdmin = token ? jwtDecode(token).userType === 'admin' : false;
 
   useEffect(() => {
     if (!token) {
@@ -53,12 +54,15 @@ const ClientList = () => {
       </nav>
 
       <div className="container mt-4">
-      <BackArrow />
         <div className="card">
-          
-          <div className="card-header text-center d-flex justify-content-center align-items-center">
+          <div className="card-header text-center d-flex justify-content-between align-items-center">
             <img src="/client_list_button_icon.png" alt="Client icon" className="card-icon me-2" />
             <strong>Client List</strong>
+            {isAdmin && (
+              <Link to="/addClient" className="btn btn-primary">
+                Add New Client
+              </Link>
+            )}
           </div>
           <div className="card-body">
             <div className="search-container">

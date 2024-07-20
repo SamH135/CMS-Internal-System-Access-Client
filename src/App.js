@@ -20,7 +20,7 @@ import ReceiptInfo from './components/ReceiptInfo';
 import RequestList from './components/RequestList';
 import SessionExpiredModal from './components/SessionExpiredModal';
 import useInactivityCheck from './hooks/useInactivityCheck';
-// ... other imports
+import AddClient from './components/AddClient.jsx';
 
 function App() {
   const dispatch = useDispatch();
@@ -67,6 +67,7 @@ function App() {
         <Route path="/receiptList" element={<ReceiptList />} />
         <Route path="/receiptInfo/:receiptID" element={<ReceiptInfo />} />
         <Route path="/requestList" element={<RequestList />} />
+        <Route path="/addClient" element={<PrivateRoute element={AddClient} roles={['admin']} />} />
       </Routes>
     </Router>
   );
