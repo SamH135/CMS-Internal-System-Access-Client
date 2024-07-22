@@ -21,6 +21,9 @@ import RequestList from './components/RequestList';
 import SessionExpiredModal from './components/SessionExpiredModal';
 import useInactivityCheck from './hooks/useInactivityCheck';
 import AddClient from './components/AddClient.jsx';
+import SetPricesPage from './components/SetPricesPage';
+import SetHVACPrices from './components/SetHVACPrices';
+import SetAutoPrices from './components/SetAutoPrices';
 
 function App() {
   const dispatch = useDispatch();
@@ -68,6 +71,9 @@ function App() {
         <Route path="/receiptInfo/:receiptID" element={<ReceiptInfo />} />
         <Route path="/requestList" element={<RequestList />} />
         <Route path="/addClient" element={<PrivateRoute element={AddClient} roles={['admin']} />} />
+        <Route path="/set-prices" element={<PrivateRoute element={SetPricesPage} roles={['admin']} />} />
+        <Route path="/set-hvac-prices" element={<PrivateRoute element={SetHVACPrices} roles={['admin']} />} />
+        <Route path="/set-auto-prices" element={<PrivateRoute element={SetAutoPrices} roles={['admin']} />} />
       </Routes>
     </Router>
   );

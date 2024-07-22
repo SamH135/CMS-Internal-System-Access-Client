@@ -3,33 +3,36 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosInstance';
 import BackArrow from './BackArrow';
 
-const SetHVACPrices = () => {
+const SetAutoPrices = () => {
   const [prices, setPrices] = useState({});
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
   const relevantFields = useMemo(() => [
+    'drumsrotorsprice',
+    'shortironprice',
     'shredsteelprice',
-    'dirtyalumcopperradiatorsprice',
-    'cleanaluminumradiatorsprice',
-    'coppertwoprice',
-    'compressorsprice',
-    'dirtybrassprice',
-    'electricmotorsprice',
-    'aluminumbreakageprice'
+    'aluminumbreakageprice',
+    'dirtyaluminumradiatorsprice',
+    'wiringharnessprice',
+    'accompressorprice',
+    'alternatorstarterprice',
+    'aluminumrimsprice',
+    'chromerimsprice',
+    'brasscopperradiatorprice'
   ], []);
 
   useEffect(() => {
     const fetchCurrentPrices = async () => {
       try {
-        const response = await axiosInstance.get('/api/hvac-prices');
+        const response = await axiosInstance.get('/api/auto-prices');
         const filteredPrices = {};
         relevantFields.forEach(field => {
           filteredPrices[field] = response.data[field] || '';
         });
         setPrices(filteredPrices);
       } catch (error) {
-        console.error('Error fetching HVAC prices:', error);
+        console.error('Error fetching Auto prices:', error);
         setMessage('Error fetching current prices. Please try again.');
       }
     };
@@ -47,19 +50,19 @@ const SetHVACPrices = () => {
       const pricesData = Object.fromEntries(
         Object.entries(prices).map(([key, value]) => [key, parseFloat(value)])
       );
-      const response = await axiosInstance.post('/api/hvac-prices', pricesData);
+      const response = await axiosInstance.post('/api/auto-prices', pricesData);
       setMessage(response.data.message);
-      setTimeout(() => navigate('/set-prices'), 5000);
+      setTimeout(() => navigate('/set-prices'), 4000);
     } catch (error) {
-      console.error('Error setting HVAC prices:', error);
-      setMessage('Error updating HVAC prices. Please try again.');
+      console.error('Error setting Auto prices:', error);
+      setMessage('Error updating Auto prices. Please try again.');
     }
   };
 
   return (
     <div className="container mt-4">
       <BackArrow />
-      <h2 className="text-center mb-4">Set HVAC Prices</h2>
+      <h2 className="text-center mb-4">Set Auto Prices</h2>
       {message && <div className="alert alert-info">{message}</div>}
       <form onSubmit={handleSubmit}>
         {Object.entries(prices).map(([key, value]) => (
@@ -83,4 +86,4 @@ const SetHVACPrices = () => {
   );
 };
 
-export default SetHVACPrices;
+export default SetAutoPrices;

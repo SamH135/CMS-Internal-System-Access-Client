@@ -58,6 +58,18 @@ const Dashboard = () => {
                   </Link>
                 </div>
               )}
+              {userType === 'admin' && (
+                <div className="col-sm-6 mb-4">
+                  <Link to="/set-prices" className="card-link">
+                    <div className="card inner-card">
+                      <div className="card-body d-flex justify-content-between align-items-center">
+                        <h5 className="card-title mb-0">Set Prices</h5>
+                        <img src="/set_prices_icon.png" alt="Set Prices icon" className="card-icon" />
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              )}
               <div className="col-sm-6 mb-4">
                 <Link to="/receiptList" className="card-link">
                   <div className="card inner-card">

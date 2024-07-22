@@ -7,8 +7,8 @@ const BackArrow = () => {
   const [isHovered, setIsHovered] = useState(false);
 
   const handleGoBack = () => {
-    // If we're on the UserDashboard, always go back to the main dashboard
-    if (location.pathname === '/userDashboard') {
+    // always go back to the main dashboard from these pages
+    if (location.pathname === '/userDashboard' || location.pathname === '/set-prices' || location.pathname === '/clientList' || location.pathname === '/pickupInfo') {
       navigate('/dashboard');
     } else {
       navigate(-1);

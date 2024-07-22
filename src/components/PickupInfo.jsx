@@ -1,3 +1,5 @@
+// src/components/PickupInfo.jsx
+
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosInstance';
@@ -8,6 +10,25 @@ const formatDate = (dateString) => {
   if (!dateString) return 'N/A';
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
   return new Date(dateString).toLocaleDateString(undefined, options);
+};
+
+const formatTime = (timeString) => {
+  if (!timeString) return 'N/A';
+  return new Date(timeString).toLocaleTimeString();
+};
+
+const getStartOfWeek = (date) => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
+  return new Date(d.setDate(diff));
+};
+
+const getEndOfWeek = (date) => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + 7; // add 7 to get to the end of the week
+  return new Date(d.setDate(diff));
 };
 
 const PickupInfo = () => {
@@ -27,28 +48,29 @@ const PickupInfo = () => {
       const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/pickupInfo`);
       console.log('Pickup Info Response:', response.data);
 
-      const clients = response.data.clients || [];
-      if (!Array.isArray(clients)) {
-        console.error('Client data is not an array:', clients);
+      const receipts = response.data.receipts || [];
+      if (!Array.isArray(receipts)) {
+        console.error('Receipt data is not an array:', receipts);
         return;
       }
 
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      const monday = new Date(today);
-      monday.setDate(today.getDate() - today.getDay() + 1);
+      const startOfWeek = getStartOfWeek(today);
+      const endOfWeek = getEndOfWeek(today);
 
-      const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
-      setPickupsToday(clients.filter(client => new Date(client.lastpickupdate).toDateString() === today.toDateString()));
-      setPickupsThisWeek(clients.filter(client => {
-        const pickupDate = new Date(client.lastpickupdate);
-        return pickupDate >= monday && pickupDate < today;
+      setPickupsToday(receipts.filter(receipt => new Date(receipt.pickupdate).toDateString() === today.toDateString()));
+      setPickupsThisWeek(receipts.filter(receipt => {
+        const pickupDate = new Date(receipt.pickupdate);
+        return pickupDate >= startOfWeek && pickupDate <= endOfWeek;
       }));
-      setPickupsThisMonth(clients.filter(client => {
-        const pickupDate = new Date(client.lastpickupdate);
-        return pickupDate >= firstOfMonth && pickupDate < today;
+      setPickupsThisMonth(receipts.filter(receipt => {
+        const pickupDate = new Date(receipt.pickupdate);
+        return pickupDate >= startOfMonth && pickupDate <= endOfMonth;
       }));
     } catch (error) {
       console.error('Error retrieving pickup information:', error);
@@ -64,40 +86,8 @@ const PickupInfo = () => {
     }
   };
 
-  const handleRowClick = async (client) => {
-    try {
-      if (!client.clientid) {
-        console.error('Client ID is undefined');
-        //  might want to show an error message to the user here
-        return;
-      }
-  
-      const formattedDate = formatDateForQuery(client.lastpickupdate);
-      
-      // Fetch the receipt for this client's last pickup date
-      const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/getReceiptByClientAndDate`, {
-        params: {
-          clientId: client.clientid,
-          date: formattedDate
-        }
-      });
-      
-      if (response.data.receipt) {
-        navigate(`/receiptInfo/${response.data.receipt.receiptid}`);
-      } else {
-        console.error('No receipt found for this pickup');
-        //  might want to show an error message to the user here
-      }
-    } catch (error) {
-      console.error('Error fetching receipt:', error);
-      //  might want to show an error message to the user here
-    }
-  };
-  
-  // Helper function to format date for the query
-  const formatDateForQuery = (dateString) => {
-    const date = new Date(dateString);
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  const handleRowClick = (receipt) => {
+    navigate(`/receiptInfo/${receipt.receiptid}`);
   };
 
   const renderTable = (data, title) => (
@@ -111,13 +101,15 @@ const PickupInfo = () => {
             columns={[
               { header: 'Client Name', field: 'clientname' },
               { header: 'Location', field: 'clientlocation' },
-              { header: 'Last Pickup Date', field: 'lastpickupdate' },
+              { header: 'Pickup Date', field: 'pickupdate' },
+              { header: 'Pickup Time', field: 'pickuptime' },
               { header: 'Needs Pickup', field: 'needspickup' },
             ]}
-            data={data.map((client) => ({
-              ...client,
-              lastpickupdate: formatDate(client.lastpickupdate),
-              needspickup: client.needspickup ? 'Yes' : 'No',
+            data={data.map((receipt) => ({
+              ...receipt,
+              pickupdate: formatDate(receipt.pickupdate),
+              pickuptime: formatTime(receipt.pickuptime),
+              needspickup: receipt.needspickup ? 'Yes' : 'No',
             }))}
             onRowClick={handleRowClick}
           />
