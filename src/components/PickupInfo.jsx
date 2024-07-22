@@ -103,13 +103,12 @@ const PickupInfo = () => {
               { header: 'Location', field: 'clientlocation' },
               { header: 'Pickup Date', field: 'pickupdate' },
               { header: 'Pickup Time', field: 'pickuptime' },
-              { header: 'Needs Pickup', field: 'needspickup' },
+              { header: 'Created By', field: 'createdby' },
             ]}
             data={data.map((receipt) => ({
               ...receipt,
               pickupdate: formatDate(receipt.pickupdate),
               pickuptime: formatTime(receipt.pickuptime),
-              needspickup: receipt.needspickup ? 'Yes' : 'No',
             }))}
             onRowClick={handleRowClick}
           />
