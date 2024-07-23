@@ -6,7 +6,7 @@ import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
 import GenericPieChart from './GenericPieChart';
 import BackArrow from './BackArrow';
-import { formatDateForInput } from '../dateUtils';
+import { formatDateForInput, parseUTCDate } from '../dateUtils';
 
 const ClientInfo = () => {
   const [client, setClient] = useState(null);
@@ -60,19 +60,19 @@ const ClientInfo = () => {
     }
   };
 
-  const daysSinceLastPickup = () => {
-    if (!totals.lastpickupdate) return 'N/A';
-    const lastPickup = new Date(totals.lastpickupdate);
-    const today = new Date();
-    
-    lastPickup.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
-    
-    const diffTime = Math.abs(today - lastPickup);
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
-    return diffDays;
-  };
+const daysSinceLastPickup = () => {
+  if (!totals.lastpickupdate) return 'N/A';
+  const lastPickup = parseUTCDate(totals.lastpickupdate);
+  const today = new Date();
+  
+  lastPickup.setUTCHours(0, 0, 0, 0);
+  today.setUTCHours(0, 0, 0, 0);
+  
+  const diffTime = Math.abs(today - lastPickup);
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  return diffDays;
+};
 
   const daysOverdue = () => {
     const daysSince = daysSinceLastPickup();
