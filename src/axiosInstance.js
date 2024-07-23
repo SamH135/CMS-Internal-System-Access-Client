@@ -13,8 +13,12 @@ const isTokenExpired = (token) => {
   if (!token) return true;
   try {
     const decodedToken = jwtDecode(token);
-    return decodedToken.exp < Date.now() / 1000;
+    const currentTime = Date.now() / 1000;
+    console.log('Token expiration:', decodedToken.exp);
+    console.log('Current time:', currentTime);
+    return decodedToken.exp < currentTime;
   } catch (error) {
+    console.error('Error decoding token:', error);
     return true;
   }
 };
@@ -24,6 +28,8 @@ axiosInstance.interceptors.request.use(
     const token = localStorage.getItem('token');
     if (token) {
       if (isTokenExpired(token)) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userType');
         store.dispatch(logout());
         window.dispatchEvent(new CustomEvent('sessionExpired'));
       } else {
@@ -34,7 +40,6 @@ axiosInstance.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {

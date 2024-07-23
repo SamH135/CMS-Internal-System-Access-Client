@@ -3,7 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { loginSuccess } from './redux/actions/authActions';
+import { loginSuccess, logout } from './redux/actions/authActions';
 import { useSelector } from 'react-redux';
 import Index from './components/Index';
 import Login from './components/Login';
@@ -24,6 +24,8 @@ import AddClient from './components/AddClient.jsx';
 import SetPricesPage from './components/SetPricesPage';
 import SetHVACPrices from './components/SetHVACPrices';
 import SetAutoPrices from './components/SetAutoPrices';
+import { jwtDecode } from 'jwt-decode';
+
 
 function App() {
   const dispatch = useDispatch();
@@ -35,11 +37,34 @@ function App() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const storedUserType = localStorage.getItem('userType');
-    if (token && storedUserType) {
-      dispatch(loginSuccess(token, storedUserType));
+    
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        if (decodedToken.exp < Date.now() / 1000) {
+          // Token is expired, clear it
+          console.log('Stored token is expired, clearing...');
+          localStorage.removeItem('token');
+          localStorage.removeItem('userType');
+          dispatch(logout());
+        } else {
+          // Token is valid, use it
+          console.log('Stored token is valid, logging in...');
+          dispatch(loginSuccess(token, storedUserType));
+        }
+      } catch (error) {
+        // Invalid token, clear it
+        console.error('Error decoding token:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('userType');
+        dispatch(logout());
+      }
+    } else {
+      console.log('No token found in localStorage');
     }
 
     const handleSessionExpired = () => {
+      console.log('Session expired event received');
       setShowSessionExpiredModal(true);
     };
 
