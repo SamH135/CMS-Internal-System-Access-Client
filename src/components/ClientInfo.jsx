@@ -98,7 +98,7 @@ const ClientInfo = () => {
             <h5>Fee Distribution</h5>
           </div>
           <div className="card-body">
-            <GenericPieChart data={feeData} title="Fee Distribution" />
+            <GenericPieChart data={feeData} />
           </div>
         </div>
       );
@@ -110,7 +110,7 @@ const ClientInfo = () => {
             <h5>Metal Distribution</h5>
           </div>
           <div className="card-body">
-            <GenericPieChart data={metals} title="Metal Distribution" />
+            <GenericPieChart data={metals} />
           </div>
         </div>
       );
