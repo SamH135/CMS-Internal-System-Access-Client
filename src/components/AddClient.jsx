@@ -15,8 +15,9 @@ const AddClient = () => {
     avgtimebetweenpickups: '',
     locationnotes: '',
     locationcontact: '',
-    paymentmethod: ''
+    paymentmethod: 'Cash'
   });
+
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
   const token = useSelector((state) => state.auth.token);
