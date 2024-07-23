@@ -8,12 +8,17 @@ export const parseUTCDate = (dateString) => {
     return new Date(dateString + 'Z');
   };
   
-export const formatDate = (dateString) => {
-if (!dateString) return 'N/A';
-const date = parseUTCDate(dateString);
-const options = { year: 'numeric', month: 'long', day: 'numeric' };
-return date.toLocaleDateString(undefined, options);
-};
+  export const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    const options = { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      timeZone: 'UTC'  
+    };
+    return date.toLocaleDateString(undefined, options);
+  };
 
 export const formatTime = (timeString) => {
 if (!timeString) return 'N/A';
