@@ -10,16 +10,18 @@ import { parseUTCDate, formatDate, formatTime } from '../dateUtils';
 
 const getStartOfWeek = (date) => {
   const d = new Date(date);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
-  return new Date(d.setDate(diff));
+  d.setUTCHours(0, 0, 0, 0);
+  const day = d.getUTCDay();
+  const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), diff));
 };
 
 const getEndOfWeek = (date) => {
   const d = new Date(date);
-  const day = d.getDay();
-  const diff = d.getDate() - day + 7; // add 7 to get to the end of the week
-  return new Date(d.setDate(diff));
+  d.setUTCHours(23, 59, 59, 999);
+  const day = d.getUTCDay();
+  const diff = d.getUTCDate() + (7 - day);
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), diff));
 };
 
 const PickupInfo = () => {
@@ -46,15 +48,18 @@ const PickupInfo = () => {
       }
 
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
+      today.setUTCHours(0, 0, 0, 0);
+      
       const startOfWeek = getStartOfWeek(today);
       const endOfWeek = getEndOfWeek(today);
 
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      const startOfMonth = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
+      const endOfMonth = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + 1, 0));
 
-      setPickupsToday(receipts.filter(receipt => parseUTCDate(receipt.pickupdate).toDateString() === today.toDateString()));
+      setPickupsToday(receipts.filter(receipt => {
+        const pickupDate = parseUTCDate(receipt.pickupdate);
+        return pickupDate.toUTCString().split('T')[0] === today.toUTCString().split('T')[0];
+      }));
       setPickupsThisWeek(receipts.filter(receipt => {
         const pickupDate = parseUTCDate(receipt.pickupdate);
         return pickupDate >= startOfWeek && pickupDate <= endOfWeek;

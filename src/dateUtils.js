@@ -1,33 +1,34 @@
-// src/dateUtils.js
-
-// handles timezone conversions from UTC in the front end
-// to ensure consistent and accurate dates being displayed to user
-
+// dateUtils.js
 
 export const parseUTCDate = (dateString) => {
-    return new Date(dateString + 'Z');
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
   };
   
   export const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    const date = new Date(dateString);
+    const date = parseUTCDate(dateString);
+    if (!date) return 'Invalid Date';
     const options = { 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric',
-      timeZone: 'UTC'  
+      timeZone: 'UTC'
     };
     return date.toLocaleDateString(undefined, options);
   };
-
-export const formatTime = (timeString) => {
-if (!timeString) return 'N/A';
-const date = parseUTCDate(timeString);
-return date.toLocaleTimeString();
-};
-
-export const formatDateForInput = (dateString) => {
+  
+  export const formatTime = (timeString) => {
+    if (!timeString) return 'N/A';
+    const date = new Date(timeString);
+    if (isNaN(date.getTime())) return 'Invalid Time';
+    return date.toLocaleTimeString(undefined, { timeZone: 'UTC' });
+  };
+  
+  export const formatDateForInput = (dateString) => {
     if (!dateString) return '';
     const date = parseUTCDate(dateString);
+    if (!date) return '';
     return date.toISOString().split('T')[0];
-};
+  };
