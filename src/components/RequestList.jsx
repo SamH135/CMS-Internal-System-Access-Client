@@ -4,11 +4,8 @@ import { useSelector } from 'react-redux';
 import { jwtDecode } from 'jwt-decode';
 import axiosInstance from '../axiosInstance';
 import Table from './Table';
+import { formatDate } from '../dateUtils';
 
-const formatDate = (dateString) => {
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  return new Date(dateString).toLocaleDateString(undefined, options);
-};
 
 const RequestList = () => {
   const token = useSelector((state) => state.auth.token);

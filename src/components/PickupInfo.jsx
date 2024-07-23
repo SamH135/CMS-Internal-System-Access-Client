@@ -5,17 +5,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosInstance';
 import Table from './Table';
 import BackArrow from './BackArrow';
+import { parseUTCDate, formatDate, formatTime } from '../dateUtils';
 
-const formatDate = (dateString) => {
-  if (!dateString) return 'N/A';
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  return new Date(dateString).toLocaleDateString(undefined, options);
-};
-
-const formatTime = (timeString) => {
-  if (!timeString) return 'N/A';
-  return new Date(timeString).toLocaleTimeString();
-};
 
 const getStartOfWeek = (date) => {
   const d = new Date(date);
@@ -63,13 +54,13 @@ const PickupInfo = () => {
       const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
       const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
-      setPickupsToday(receipts.filter(receipt => new Date(receipt.pickupdate).toDateString() === today.toDateString()));
+      setPickupsToday(receipts.filter(receipt => parseUTCDate(receipt.pickupdate).toDateString() === today.toDateString()));
       setPickupsThisWeek(receipts.filter(receipt => {
-        const pickupDate = new Date(receipt.pickupdate);
+        const pickupDate = parseUTCDate(receipt.pickupdate);
         return pickupDate >= startOfWeek && pickupDate <= endOfWeek;
       }));
       setPickupsThisMonth(receipts.filter(receipt => {
-        const pickupDate = new Date(receipt.pickupdate);
+        const pickupDate = parseUTCDate(receipt.pickupdate);
         return pickupDate >= startOfMonth && pickupDate <= endOfMonth;
       }));
     } catch (error) {

@@ -6,6 +6,7 @@ import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
 import GenericPieChart from './GenericPieChart';
 import BackArrow from './BackArrow';
+import { formatDateForInput } from '../dateUtils';
 
 const ClientInfo = () => {
   const [client, setClient] = useState(null);
@@ -78,10 +79,6 @@ const ClientInfo = () => {
     if (daysSince === 'N/A' || !client.avgtimebetweenpickups) return 'N/A';
     const overdueDays = daysSince - client.avgtimebetweenpickups;
     return overdueDays > 0 ? overdueDays : 0;
-  };
-
-  const formatDateForInput = (dateString) => {
-    return dateString ? dateString.split('T')[0] : '';
   };
 
   const renderMetalDistribution = () => {

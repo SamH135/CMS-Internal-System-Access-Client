@@ -5,11 +5,8 @@ import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
 import Table from './Table';
 import BackArrow from './BackArrow';
+import { formatDate } from '../dateUtils';
 
-const formatDate = (dateString) => {
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  return new Date(dateString).toLocaleDateString(undefined, options);
-};
 
 const ReceiptList = () => {
   const token = useSelector((state) => state.auth.token);
