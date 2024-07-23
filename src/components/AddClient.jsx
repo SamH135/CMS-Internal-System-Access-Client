@@ -100,7 +100,18 @@ const AddClient = () => {
               </div>
               <div className="form-group">
                 <label htmlFor="paymentmethod">Payment Method:</label>
-                <input type="text" className="form-control" id="paymentmethod" name="paymentmethod" value={client.paymentmethod} onChange={handleInputChange} />
+                <select 
+                  className="form-control" 
+                  id="paymentmethod" 
+                  name="paymentmethod" 
+                  value={client.paymentmethod} 
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="Cash">Cash</option>
+                  <option value="Check">Check</option>
+                  <option value="Direct Deposit">Direct Deposit</option>
+                </select>
               </div>
               <button type="submit" className="btn btn-primary mt-3">Add Client</button>
             </form>
