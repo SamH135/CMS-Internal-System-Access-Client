@@ -201,7 +201,7 @@ const ReceiptInfo = () => {
                 <p>Total Volume: {formatWeight(receipt.totalvolume)}</p>
                 <p>Total Payout: {formatCurrency(receipt.totalpayout)}</p>
                 <p>Pickup Date: {new Date(receipt.pickupdate).toLocaleDateString()}</p>
-                <p>Pickup Time: {formatTime(receipt.pickuptime)} (Your local time)</p>
+                <p>Pickup Time: {formatTime(receipt.pickuptime)}</p>
                 <p>Created By: {receipt.createdby}</p>
               </div>
             </div>

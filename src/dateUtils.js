@@ -19,15 +19,26 @@ export const parseUTCDate = (dateString) => {
     return date.toLocaleDateString(undefined, options);
   };
   
-  export const formatTime = (timeString) => {
-    const date = new Date(timeString);
-    return date.toLocaleTimeString('en-US', {
+  export const formatTime = (inputTimeString) => {
+    const date = new Date(inputTimeString);
+    const formattedTime = date.toLocaleTimeString('en-US', {
       hour12: true,
       hour: '2-digit',
       minute: '2-digit'
     });
+    
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const timeZoneAbbr = getTimeZoneAbbreviation(timeZone, date);
+    
+    return `${formattedTime} (${timeZoneAbbr})`;
   };
   
+  function getTimeZoneAbbreviation(timeZone, date) {
+    const options = { timeZone, timeZoneName: 'short' };
+    return new Intl.DateTimeFormat('en-US', options).formatToParts(date)
+      .find(part => part.type === 'timeZoneName').value;
+  }
+
   export const formatDateForInput = (dateString) => {
     if (!dateString) return '';
     const date = parseUTCDate(dateString);
