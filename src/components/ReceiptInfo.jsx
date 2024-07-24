@@ -6,6 +6,7 @@ import Logout from './Logout';
 import GenericPieChart from './GenericPieChart';
 import Table from './Table';
 import BackArrow from './BackArrow';
+import { formatTime } from '../dateUtils';
 
 const ReceiptInfo = () => {
   const [receipt, setReceipt] = useState(null);
@@ -200,7 +201,7 @@ const ReceiptInfo = () => {
                 <p>Total Volume: {formatWeight(receipt.totalvolume)}</p>
                 <p>Total Payout: {formatCurrency(receipt.totalpayout)}</p>
                 <p>Pickup Date: {new Date(receipt.pickupdate).toLocaleDateString()}</p>
-                <p>Pickup Time: {new Date(receipt.pickuptime).toLocaleTimeString()}</p>
+                <p>Pickup Time: {formatTime(receipt.pickuptime)} (Your local time)</p>
                 <p>Created By: {receipt.createdby}</p>
               </div>
             </div>

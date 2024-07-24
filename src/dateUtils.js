@@ -20,10 +20,12 @@ export const parseUTCDate = (dateString) => {
   };
   
   export const formatTime = (timeString) => {
-    if (!timeString) return 'N/A';
     const date = new Date(timeString);
-    if (isNaN(date.getTime())) return 'Invalid Time';
-    return date.toLocaleTimeString(undefined, { timeZone: 'UTC' });
+    return date.toLocaleTimeString('en-US', {
+      hour12: true,
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
   
   export const formatDateForInput = (dateString) => {
