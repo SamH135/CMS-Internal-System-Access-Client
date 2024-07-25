@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useReducer } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { jwtDecode } from 'jwt-decode';
@@ -8,11 +8,25 @@ import GenericPieChart from './GenericPieChart';
 import BackArrow from './BackArrow';
 import { formatDateForInput, parseUTCDate } from '../dateUtils';
 
+const feeReducer = (state, action) => {
+  switch (action.type) {
+    case 'SET_INITIAL_FEES':
+      return { dumpFee: action.payload.dumpFee, haulFee: action.payload.haulFee };
+    case 'UPDATE_FEE':
+      return { ...state, [action.payload.feeType]: action.payload.value };
+    default:
+      return state;
+  }
+};
+
 const ClientInfo = () => {
   const [client, setClient] = useState(null);
   const [metals, setMetals] = useState({});
   const [totals, setTotals] = useState({});
   const [isEditing, setIsEditing] = useState(false);
+  const [feeState, feeDispatch] = useReducer(feeReducer, { dumpFee: 0, haulFee: 0 });
+  const [dumpFeeAdjustment, setDumpFeeAdjustment] = useState('');
+  const [haulFeeAdjustment, setHaulFeeAdjustment] = useState('');
   const { clientID } = useParams();
   const navigate = useNavigate();
   const token = useSelector((state) => state.auth.token);
@@ -28,13 +42,20 @@ const ClientInfo = () => {
         ]);
         setClient(clientResponse.data.client);
         setMetals(metalsResponse.data.metals);
-        console.log('Metals data from API:', metalsResponse.data.metals);
         setTotals(totalsResponse.data.totals);
+  
+        const dumpFee = parseFloat(metalsResponse.data.metals['Dump Fees'] || 0);
+        const haulFee = parseFloat(metalsResponse.data.metals['Haul Fees'] || 0);
+  
+        feeDispatch({
+          type: 'SET_INITIAL_FEES',
+          payload: { dumpFee, haulFee }
+        });
       } catch (error) {
         console.error('Error retrieving client data:', error);
       }
     };
-
+  
     if (token) {
       fetchClientData();
     } else {
@@ -60,19 +81,101 @@ const ClientInfo = () => {
     }
   };
 
-const daysSinceLastPickup = () => {
-  if (!totals.lastpickupdate) return 'N/A';
-  const lastPickup = parseUTCDate(totals.lastpickupdate);
-  const today = new Date();
+  const handleFeeInputChange = (feeType, value) => {
+    if (feeType === 'dumpfee') {
+      setDumpFeeAdjustment(value);
+    } else {
+      setHaulFeeAdjustment(value);
+    }
+  };
+
+  const handleFeeAdjustment = async (feeType, amount, isAddition = true) => {
+    if (!isAdmin) return;
   
-  lastPickup.setUTCHours(0, 0, 0, 0);
-  today.setUTCHours(0, 0, 0, 0);
+    const numericAmount = parseFloat(amount);
+    if (isNaN(numericAmount)) {
+      console.error('Invalid amount');
+      return;
+    }
   
-  const diffTime = Math.abs(today - lastPickup);
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const feeKey = feeType === 'dumpfee' ? 'dumpFee' : 'haulFee';
+    const confirmMessage = isAddition 
+      ? `Are you sure you want to add $${numericAmount.toFixed(2)} to the ${feeType === 'dumpfee' ? 'Dump' : 'Haul'} Fee?`
+      : `Warning: You are about to set the ${feeType === 'dumpfee' ? 'Dump' : 'Haul'} Fee to $${numericAmount.toFixed(2)}. This will overwrite the current value. Are you sure?`;
   
-  return diffDays;
-};
+    if (window.confirm(confirmMessage)) {
+      // Calculate the new fee value
+      const currentFee = feeState[feeKey];
+      const newFee = isAddition ? currentFee + numericAmount : numericAmount;
+  
+      // Immediately update the state with the new calculated value
+      feeDispatch({
+        type: 'UPDATE_FEE',
+        payload: { feeType: feeKey, value: newFee }
+      });
+  
+      try {
+        const response = await axiosInstance.post(`${process.env.REACT_APP_API_URL}/api/adjustInsulationFee`, {
+          clientID: client.clientid,
+          feeType,
+          amount: numericAmount,
+          isAddition
+        });
+        
+        if (response.data.success) {
+          const updatedFee = parseFloat(response.data[feeType]);
+          if (!isNaN(updatedFee)) {
+            // Update with the server's response
+            feeDispatch({
+              type: 'UPDATE_FEE',
+              payload: { feeType: feeKey, value: updatedFee }
+            });
+  
+            setMetals(prevMetals => ({
+              ...prevMetals,
+              [feeType === 'dumpfee' ? 'Dump Fees' : 'Haul Fees']: updatedFee
+            }));
+  
+            // Update totals
+            setTotals(prevTotals => ({
+              ...prevTotals,
+              totalpayout: parseFloat(prevTotals.totalpayout) + (isAddition ? numericAmount : updatedFee - currentFee)
+            }));
+          } else {
+            console.error('Invalid fee value received from server');
+          }
+        }
+      } catch (error) {
+        console.error(`Error adjusting ${feeType}:`, error);
+        // Revert to the original value if there's an error
+        feeDispatch({
+          type: 'UPDATE_FEE',
+          payload: { feeType: feeKey, value: currentFee }
+        });
+      } finally {
+        // Clear adjustment input
+        if (feeType === 'dumpfee') {
+          setDumpFeeAdjustment('');
+        } else {
+          setHaulFeeAdjustment('');
+        }
+      }
+    }
+  };
+
+  const daysSinceLastPickup = () => {
+    if (!totals.lastpickupdate) return 'N/A';
+    const lastPickup = parseUTCDate(totals.lastpickupdate);
+    const today = new Date();
+    
+    lastPickup.setUTCHours(0, 0, 0, 0);
+    today.setUTCHours(0, 0, 0, 0);
+    
+    const diffTime = Math.abs(today - lastPickup);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    return diffDays;
+  };
 
   const daysOverdue = () => {
     const daysSince = daysSinceLastPickup();
@@ -86,8 +189,8 @@ const daysSinceLastPickup = () => {
   
     if (client.clienttype === 'insulation') {
       const feeData = {
-        'Dump Fees': parseFloat(metals['Dump Fees'] || 0),
-        'Haul Fees': parseFloat(metals['Haul Fees'] || 0)
+        'Dump Fees': feeState.dumpFee,
+        'Haul Fees': feeState.haulFee
       };
       return (
         <div className="card mb-4">
@@ -100,7 +203,6 @@ const daysSinceLastPickup = () => {
         </div>
       );
     } else {
-      // Existing code for other client types
       return (
         <div className="card mb-4">
           <div className="card-header">
@@ -150,8 +252,8 @@ const daysSinceLastPickup = () => {
         <div className="card-body">
           {client.clienttype === 'insulation' ? (
             <>
-              <p>Total Dump Fees: ${parseFloat(metals['Dump Fees'] || 0).toFixed(2)}</p>
-              <p>Total Haul Fees: ${parseFloat(metals['Haul Fees'] || 0).toFixed(2)}</p>
+              <p>Total Dump Fees: ${feeState.dumpFee.toFixed(2)}</p>
+              <p>Total Haul Fees: ${feeState.haulFee.toFixed(2)}</p>
             </>
           ) : (
             Object.entries(metals).map(([key, value]) => (
@@ -159,6 +261,48 @@ const daysSinceLastPickup = () => {
             ))
           )}
           <p>Total Payout: ${parseFloat(totals.totalpayout || 0).toFixed(2)}</p>
+        </div>
+      </div>
+    );
+  };
+
+  const renderInsulationFees = () => {
+    if (client.clienttype !== 'insulation' || !isAdmin) return null;
+  
+    return (
+      <div className="card mb-4">
+        <div className="card-header">
+          <h5>Insulation Fees</h5>
+        </div>
+        <div className="card-body">
+          <div className="mb-3">
+            <label>Dump Fee: ${feeState.dumpFee.toFixed(2)}</label>
+            <div className="input-group">
+              <input
+                type="number"
+                className="form-control"
+                value={dumpFeeAdjustment}
+                onChange={(e) => handleFeeInputChange('dumpfee', e.target.value)}
+                placeholder="0"
+              />
+              <button className="btn btn-outline-secondary" onClick={() => handleFeeAdjustment('dumpfee', dumpFeeAdjustment)}>Add</button>
+              <button className="btn btn-outline-warning" onClick={() => handleFeeAdjustment('dumpfee', dumpFeeAdjustment, false)}>Set</button>
+            </div>
+          </div>
+          <div className="mb-3">
+            <label>Haul Fee: ${feeState.haulFee.toFixed(2)}</label>
+            <div className="input-group">
+              <input
+                type="number"
+                className="form-control"
+                value={haulFeeAdjustment}
+                onChange={(e) => handleFeeInputChange('haulfee', e.target.value)}
+                placeholder="0"
+              />
+              <button className="btn btn-outline-secondary" onClick={() => handleFeeAdjustment('haulfee', haulFeeAdjustment)}>Add</button>
+              <button className="btn btn-outline-warning" onClick={() => handleFeeAdjustment('haulfee', haulFeeAdjustment, false)}>Set</button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -180,23 +324,23 @@ const daysSinceLastPickup = () => {
       </nav>
 
       <div className="container mt-4">
-        
-      <div className="text-center">
-        <h1 className="mb-4 d-inline-flex align-items-center">
-          <BackArrow />
-          <span className="ms-2">
-            {client.clientname} 
+        <div className="text-center">
+          <h1 className="mb-4 d-inline-flex align-items-center">
+            <BackArrow />
             <span className="ms-2">
-              ({client.clienttype})
+              {client.clientname} 
+              <span className="ms-2">
+                ({client.clienttype})
+              </span>
             </span>
-          </span>
-        </h1>
-      </div>
+          </h1>
+        </div>
         <div className="row">
           <div className="col-md-6">
             {renderMetalDistribution()}
             {renderClientTotals()}
             {renderPickupInfo()}
+            {renderInsulationFees()}
           </div>
           <div className="col-md-6">
             <div className="card">
