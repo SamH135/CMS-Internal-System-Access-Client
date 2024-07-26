@@ -5,31 +5,21 @@ import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosInstance';
 import Table from './Table';
 import BackArrow from './BackArrow';
-import { parseUTCDate, formatDate, formatTime } from '../dateUtils';
+import { Alert } from 'react-bootstrap';
+import { parseUTCDate, formatDate, formatTime, getStartOfWeek, getEndOfWeek } from '../dateUtils';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
-
-const getStartOfWeek = (date) => {
-  const d = new Date(date);
-  d.setUTCHours(0, 0, 0, 0);
-  const day = d.getUTCDay();
-  const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), diff));
-};
-
-const getEndOfWeek = (date) => {
-  const d = new Date(date);
-  d.setUTCHours(23, 59, 59, 999);
-  const day = d.getUTCDay();
-  const diff = d.getUTCDate() + (7 - day);
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), diff));
-};
 
 const PickupInfo = () => {
   const [pickupsToday, setPickupsToday] = useState([]);
   const [pickupsThisWeek, setPickupsThisWeek] = useState([]);
   const [pickupsThisMonth, setPickupsThisMonth] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [clientSearchTerm, setClientSearchTerm] = useState('');
+  const [dateSearchTerm, setDateSearchTerm] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
+  const [showClientAlert, setShowClientAlert] = useState(false);
+  const [showDateAlert, setShowDateAlert] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,25 +30,25 @@ const PickupInfo = () => {
     try {
       const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/pickupInfo`);
       console.log('Pickup Info Response:', response.data);
-
+  
       const receipts = response.data.receipts || [];
       if (!Array.isArray(receipts)) {
         console.error('Receipt data is not an array:', receipts);
         return;
       }
-
+  
       const today = new Date();
       today.setUTCHours(0, 0, 0, 0);
       
       const startOfWeek = getStartOfWeek(today);
       const endOfWeek = getEndOfWeek(today);
-
+  
       const startOfMonth = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
       const endOfMonth = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + 1, 0));
-
+  
       setPickupsToday(receipts.filter(receipt => {
         const pickupDate = parseUTCDate(receipt.pickupdate);
-        return pickupDate.toUTCString().split('T')[0] === today.toUTCString().split('T')[0];
+        return pickupDate.getTime() === today.getTime();
       }));
       setPickupsThisWeek(receipts.filter(receipt => {
         const pickupDate = parseUTCDate(receipt.pickupdate);
@@ -73,12 +63,32 @@ const PickupInfo = () => {
     }
   };
   
-  const handleSearch = async () => {
+  const handleClientSearch = async () => {
+    if (!clientSearchTerm.trim()) return;
     try {
-      const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/searchClients?term=${encodeURIComponent(searchTerm)}`);
-      setSearchResults(response.data.clients || []);
+      const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/searchPickups?term=${encodeURIComponent(clientSearchTerm)}`);
+      const results = response.data.receipts || [];
+      setSearchResults(results);
+      setShowClientAlert(results.length === 0);
+      setShowDateAlert(false);
     } catch (error) {
-      console.error('Error searching clients:', error);
+      console.error('Error searching pickups by client:', error);
+      setShowClientAlert(true);
+    }
+  };
+  
+  const handleDateSearch = async (selectedDate = dateSearchTerm) => {
+    if (!selectedDate) return;
+    try {
+      const formattedDate = selectedDate.toISOString().split('T')[0];
+      const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/searchPickups?date=${formattedDate}`);
+      const results = response.data.receipts || [];
+      setSearchResults(results);
+      setShowDateAlert(results.length === 0);
+      setShowClientAlert(false);
+    } catch (error) {
+      console.error('Error searching pickups by date:', error);
+      setShowDateAlert(true);
     }
   };
 
@@ -133,32 +143,95 @@ const PickupInfo = () => {
             <strong>Pickup Information</strong>
           </div>
           <div className="card-body">
-            <div className="search-container">
-              <input 
-                type="text" 
-                id="searchInput" 
-                className="form-control" 
-                placeholder="Search by client name or location" 
-                value={searchTerm} 
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyUp={(e) => e.key === 'Enter' && handleSearch()}
-              />
-              <img 
-                src="/search_button_icon.png" 
-                alt="Search" 
-                className={`search-icon ${searchTerm ? 'hidden' : ''}`}
-                onClick={handleSearch}
-              />
-              <img 
-                src="/close_button_icon.png" 
-                alt="Clear" 
-                className={`clear-icon ${searchTerm ? '' : 'hidden'}`}
-                onClick={() => {
-                  setSearchTerm('');
-                  setSearchResults([]);
-                  fetchPickupInfo();
-                }}
-              />
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <div className="card">
+                  <div className="card-body">
+                    <h5 className="card-title"><strong>Search by Client</strong></h5>
+                    <p className="card-text">Returns the most recent pickup for a client.</p>
+                    <div className="search-container">
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder="Enter client name or location" 
+                        value={clientSearchTerm} 
+                        onChange={(e) => setClientSearchTerm(e.target.value)}
+                        onKeyUp={(e) => e.key === 'Enter' && handleClientSearch()}
+                      />
+                      <img 
+                        src="/search_button_icon.png" 
+                        alt="Search" 
+                        className={`search-icon ${clientSearchTerm ? 'hidden' : ''}`}
+                        onClick={handleClientSearch}
+                      />
+                      <img 
+                        src="/close_button_icon.png" 
+                        alt="Clear" 
+                        className={`clear-icon ${clientSearchTerm ? '' : 'hidden'}`}
+                        onClick={() => {
+                          setClientSearchTerm('');
+                          setSearchResults([]);
+                          setShowClientAlert(false);
+                          fetchPickupInfo();
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <Alert 
+                  show={showClientAlert} 
+                  variant="info" 
+                  onClose={() => setShowClientAlert(false)} 
+                  dismissible
+                >
+                  No results found for this client. Try a different client name or location, or use the date search instead.
+                </Alert>
+              </div>
+              <div className="col-md-6 mb-3">
+                <div className="card">
+                  <div className="card-body">
+                    <h5 className="card-title"><strong>Search by Date</strong></h5>
+                    <p className="card-text">Returns all pickups for a given date.</p>
+                    <div className="search-container date-search-container">
+                    <DatePicker
+                      selected={dateSearchTerm}
+                      onChange={(date) => {
+                        setDateSearchTerm(date);
+                        handleDateSearch(date);  // Call the search function directly when a date is selected
+                      }}
+                      className="form-control"
+                      placeholderText="Select a date"
+                      dateFormat="yyyy-MM-dd"
+                    />
+                      <img 
+                        src="/search_button_icon.png" 
+                        alt="Search" 
+                        className={`search-icon ${dateSearchTerm ? 'hidden' : ''}`}
+                        onClick={handleDateSearch}
+                      />
+                      <img 
+                        src="/close_button_icon.png" 
+                        alt="Clear" 
+                        className={`clear-icon ${dateSearchTerm ? '' : 'hidden'}`}
+                        onClick={() => {
+                          setDateSearchTerm(null);
+                          setSearchResults([]);
+                          setShowDateAlert(false);
+                          fetchPickupInfo();
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <Alert 
+                  show={showDateAlert} 
+                  variant="info" 
+                  onClose={() => setShowDateAlert(false)} 
+                  dismissible
+                >
+                  No pickups found for this date. Try selecting a different date or use the client search instead.
+                </Alert>
+              </div>
             </div>
           </div>
         </div>

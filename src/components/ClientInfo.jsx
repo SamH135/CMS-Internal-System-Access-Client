@@ -198,7 +198,10 @@ const ClientInfo = () => {
             <h5>Fee Distribution</h5>
           </div>
           <div className="card-body">
-            <GenericPieChart data={feeData} />
+            <GenericPieChart 
+              data={feeData} 
+              valueFormatter={(value) => `$${parseFloat(value).toFixed(2)}`}
+            />
           </div>
         </div>
       );
@@ -209,7 +212,10 @@ const ClientInfo = () => {
             <h5>Metal Distribution</h5>
           </div>
           <div className="card-body">
-            <GenericPieChart data={metals} />
+            <GenericPieChart 
+              data={metals}
+              valueFormatter={(value) => `${parseFloat(value).toFixed(2)} lbs`}
+            />
           </div>
         </div>
       );

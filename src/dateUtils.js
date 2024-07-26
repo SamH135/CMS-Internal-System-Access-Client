@@ -45,3 +45,20 @@ export const parseUTCDate = (dateString) => {
     if (!date) return '';
     return date.toISOString().split('T')[0];
   };
+
+
+  export const getStartOfWeek = (date) => {
+    const d = new Date(date);
+    d.setUTCHours(0, 0, 0, 0);
+    const day = d.getUTCDay();
+    const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
+    return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), diff));
+  };
+  
+  export const getEndOfWeek = (date) => {
+    const d = new Date(date);
+    d.setUTCHours(23, 59, 59, 999);
+    const day = d.getUTCDay();
+    const diff = d.getUTCDate() + (7 - day);
+    return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), diff));
+  };

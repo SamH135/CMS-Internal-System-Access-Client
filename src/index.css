@@ -34,7 +34,7 @@ body {
   border-radius: 6px;
   box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2);
   margin-bottom: 20px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .card-header {
@@ -85,8 +85,8 @@ body {
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  width: 24px;  /* Slightly increased from 20px to 24px */
-  height: 24px; /* Slightly increased from 20px to 24px */
+  width: 24px;  
+  height: 24px; 
   cursor: pointer;
   filter: brightness(0.6) contrast(1.2); /* Darkens the icon */
 }
@@ -111,7 +111,32 @@ body {
 }
 
 .react-datepicker__input-container input {
+  width: calc(100% - 30px);
+  padding: 0.7rem;
+  font-size: 1rem;
+  border: 1px solid #222831;
+  border-radius: 4px;
+  box-sizing: content-box;
+  background-color: #EEEEEE;
+  color: #212020;
+}
+
+.date-search-container {
+  overflow: visible !important;
+  position: relative;
+  z-index: 1000;
+}
+
+.react-datepicker-popper {
+  z-index: 1001 !important;
+}
+
+.date-search-container .react-datepicker-wrapper {
   width: 100%;
+}
+
+.date-search-container .react-datepicker-popper {
+  z-index: 9999;
 }
 
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { PieChart } from 'react-minimal-pie-chart';
 
-const GenericPieChart = ({ data, title }) => {
+const GenericPieChart = ({ data, title, valueFormatter }) => {
     const generateColors = (numColors) => {
         const hueStep = 360 / numColors;
         return Array.from({ length: numColors }, (_, i) => {
@@ -84,7 +84,7 @@ const GenericPieChart = ({ data, title }) => {
                             <div style={{ flexGrow: 1 }}>
                                 <div style={{ color: '#ffffff', fontSize: '14px' }}>{entry.title}</div>
                                 <div style={{ color: '#cccccc', fontSize: '12px' }}>
-                                    {entry.value.toFixed(1)}lb ({entry.percentage.toFixed(1)}%)
+                                    {valueFormatter ? valueFormatter(entry.value) : `${entry.value.toFixed(1)}lb`} ({entry.percentage.toFixed(1)}%)
                                 </div>
                             </div>
                         </div>

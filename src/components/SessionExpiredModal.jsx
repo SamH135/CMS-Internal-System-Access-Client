@@ -45,6 +45,7 @@ const SessionExpiredModal = ({ show, onHide }) => {
         </Modal.Header>
         <Modal.Body style={bodyStyle}>
           Your session has timed out (sessions last for (1) hour for security purposes). Please log in again to continue.
+          If you're seeing this message and you just logged in, ignore it and click the X at the top.
         </Modal.Body>
         <Modal.Footer style={footerStyle}>
           <Button variant="primary" onClick={handleLogin}>
