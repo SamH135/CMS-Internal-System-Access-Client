@@ -67,14 +67,6 @@ const GenericPieChart = ({ data, title, valueFormatter }) => {
                         lineWidth={40}
                         segmentsStyle={{ transition: 'stroke .3s', cursor: 'pointer' }}
                         animate
-                        label={({ dataEntry }) => Math.round(dataEntry.percentage) + '%'}
-                        labelStyle={{
-                            fill: '#ffffff',
-                            fontSize: '5px',
-                            fontWeight: 'bold',
-                            textShadow: '0 0 3px black, 0 0 3px black, 0 0 3px black, 0 0 3px black',
-                        }}
-                        labelPosition={75}
                     />
                 </div>
                 <div className="custom-scrollbar" style={{ width: '35%', maxHeight: '300px', overflowY: 'auto', paddingRight: '10px' }}>

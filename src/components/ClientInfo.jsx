@@ -291,7 +291,7 @@ const ClientInfo = () => {
                 onChange={(e) => handleFeeInputChange('dumpfee', e.target.value)}
                 placeholder="0"
               />
-              <button className="btn btn-outline-secondary" onClick={() => handleFeeAdjustment('dumpfee', dumpFeeAdjustment)}>Add</button>
+              <button className="btn btn-primary" onClick={() => handleFeeAdjustment('dumpfee', dumpFeeAdjustment)}>Add</button>
               <button className="btn btn-outline-warning" onClick={() => handleFeeAdjustment('dumpfee', dumpFeeAdjustment, false)}>Set</button>
             </div>
           </div>
@@ -305,7 +305,7 @@ const ClientInfo = () => {
                 onChange={(e) => handleFeeInputChange('haulfee', e.target.value)}
                 placeholder="0"
               />
-              <button className="btn btn-outline-secondary" onClick={() => handleFeeAdjustment('haulfee', haulFeeAdjustment)}>Add</button>
+              <button className="btn btn-primary" onClick={() => handleFeeAdjustment('haulfee', haulFeeAdjustment)}>Add</button>
               <button className="btn btn-outline-warning" onClick={() => handleFeeAdjustment('haulfee', haulFeeAdjustment, false)}>Set</button>
             </div>
           </div>

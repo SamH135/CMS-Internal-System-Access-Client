@@ -24,17 +24,26 @@ const ReceiptInfo = () => {
           axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/receiptInfo/${receiptID}`),
           axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/receiptMetals/${receiptID}`)
         ]);
-        console.log('Receipt data:', receiptResponse.data);
         setReceipt(receiptResponse.data.receipt);
-        setMetals(metalsResponse.data.metals);
-        console.log('Metals data from API:', metalsResponse.data.metals);
+        
+        // Merge custom metals into metals for 'other' client type
+        if (receiptResponse.data.receipt.clienttype === 'other') {
+          const customMetalsObj = receiptResponse.data.customMetals.reduce((acc, metal) => {
+            acc[metal.metalname] = parseFloat(metal.weight);
+            return acc;
+          }, {});
+          setMetals(customMetalsObj);
+        } else {
+          setMetals(metalsResponse.data.metals);
+        }
+        
         setCustomMetals(receiptResponse.data.customMetals || []);
         setCatalyticConverters(receiptResponse.data.catalyticConverters || []);
       } catch (error) {
         console.error('Error retrieving receipt data:', error);
       }
     };
-
+  
     if (token) {
       fetchReceiptData();
     } else {
@@ -56,7 +65,10 @@ const ReceiptInfo = () => {
             <h5>Fee Distribution</h5>
           </div>
           <div className="card-body">
-            <GenericPieChart data={feeData} />
+            <GenericPieChart 
+              data={feeData}
+              valueFormatter={(value) => `$${parseFloat(value).toFixed(2)}`}
+            />
           </div>
         </div>
       );
@@ -68,26 +80,30 @@ const ReceiptInfo = () => {
         }
         return acc;
       }, {});
-
+  
       if (Object.keys(filteredMetals).length === 0) {
         return <p>No metal distribution data available.</p>;
       }
-
+  
       return (
         <div className="card mb-4">
           <div className="card-header">
             <h5>Metal Distribution</h5>
           </div>
           <div className="card-body">
-            <GenericPieChart data={filteredMetals} />
+            <GenericPieChart 
+              data={filteredMetals}
+              valueFormatter={(value) => `${parseFloat(value).toFixed(2)} lbs`}
+            />
           </div>
         </div>
       );
     }
   };
 
+
   const renderMetalDetails = () => {
-    if (!metals) return <p>No metal details available.</p>;
+    if (!metals || Object.keys(metals).length === 0) return <p>No metal details available.</p>;
   
     return (
       <div className="card mb-4">
@@ -95,16 +111,27 @@ const ReceiptInfo = () => {
           <h5>{receipt.clienttype === 'insulation' ? 'Fee Details' : 'Metal Details'}</h5>
         </div>
         <div className="card-body">
-          {receipt.clienttype === 'insulation' ? (
-            <>
-              <p>Dump Fee: {formatCurrency(metals['Dump Fee'])}</p>
-              <p>Haul Fee: {formatCurrency(metals['Haul Fee'])}</p>
-            </>
-          ) : (
-            Object.entries(metals).map(([key, value]) => (
-              <p key={key}>{key}: {formatWeight(value)}</p>
-            ))
-          )}
+          <table className="table">
+            <thead>
+              <tr>
+                <th>{receipt.clienttype === 'insulation' ? 'Fee Type' : 'Metal Name'}</th>
+                <th>{receipt.clienttype === 'insulation' ? 'Amount' : 'Weight'}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(metals).map(([key, value]) => (
+                <tr key={key}>
+                  <td>{key}</td>
+                  <td>
+                    {receipt.clienttype === 'insulation' 
+                      ? formatCurrency(value)
+                      : formatWeight(value)
+                    }
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     );
@@ -155,11 +182,11 @@ const ReceiptInfo = () => {
   };
 
   const formatCurrency = (value) => {
-    return value ? `$${parseFloat(value).toFixed(2)}` : 'N/A';
+    return value !== null && value !== undefined ? `$${parseFloat(value).toFixed(2)}` : 'N/A';
   };
-
+  
   const formatWeight = (value) => {
-    return value ? `${parseFloat(value).toFixed(2)} lbs` : 'N/A';
+    return value !== null && value !== undefined ? `${parseFloat(value).toFixed(2)} lbs` : 'N/A';
   };
 
   if (!receipt) {
@@ -184,7 +211,7 @@ const ReceiptInfo = () => {
           <div className="col-md-6">
             {renderMetalDistribution()}
             {renderMetalDetails()}
-            {renderCustomMetals()}
+            {receipt.clienttype !== 'other' && renderCustomMetals()}
             {renderCatalyticConverters()}
           </div>
           <div className="col-md-6">
