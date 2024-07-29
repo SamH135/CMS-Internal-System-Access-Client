@@ -80,6 +80,28 @@ const Dashboard = () => {
                   </div>
                 </Link>
               </div>
+              {userType === 'regular' && (
+                <div className="col-sm-6 mb-4">
+                  <Link to="/view-prices" className="card-link">
+                    <div className="card inner-card">
+                      <div className="card-body d-flex justify-content-between align-items-center">
+                        <h5 className="card-title mb-0">Prices</h5>
+                        <img src="/view_prices_icon.png" alt="View Prices icon" className="card-icon" />
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              )}
+              <div className="col-sm-6 mb-4">
+                <Link to="/view-loads" className="card-link">
+                  <div className="card inner-card">
+                    <div className="card-body d-flex justify-content-between align-items-center">
+                      <h5 className="card-title mb-0">Loads</h5>
+                      <img src="/load_weight.png" alt="load icon" className="card-icon" />
+                    </div>
+                  </div>
+                </Link>
+              </div>
             </div>
           </div>
         </div>

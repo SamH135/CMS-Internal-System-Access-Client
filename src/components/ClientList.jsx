@@ -47,25 +47,27 @@ const ClientList = () => {
   return (
     <div>
       <nav>
-        <h4>Client Management System</h4>
+        <h4>Client Management System: Clients</h4>
         <ul>
           <li><Link to="/dashboard">Dashboard</Link></li>
           <li><Logout /></li>
         </ul>
       </nav>
 
+
       <div className="container mt-4">
         <BackArrow />
         <div className="card">
-          <div className="card-header text-center d-flex justify-content-between align-items-center">
+          <div className="card-header text-center d-flex justify-content-center align-items-center">
             <img src="/client_list_button_icon.png" alt="Client icon" className="card-icon me-2" />
             <strong>Client List</strong>
-            {isAdmin && (
+            
+          </div>
+          {isAdmin && (
               <Link to="/addClient" className="btn btn-primary">
                 Add New Client
               </Link>
             )}
-          </div>
           <div className="card-body">
             <div className="search-container">
               <input 

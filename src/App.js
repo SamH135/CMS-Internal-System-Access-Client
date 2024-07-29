@@ -24,6 +24,8 @@ import AddClient from './components/AddClient.jsx';
 import SetPricesPage from './components/SetPricesPage';
 import SetHVACPrices from './components/SetHVACPrices';
 import SetAutoPrices from './components/SetAutoPrices';
+import ViewPrices from './components/ViewPrices.jsx';
+import ViewLoads from './components/ViewLoads.jsx';
 import { jwtDecode } from 'jwt-decode';
 
 
@@ -99,6 +101,8 @@ function App() {
         <Route path="/set-prices" element={<PrivateRoute element={SetPricesPage} roles={['admin']} />} />
         <Route path="/set-hvac-prices" element={<PrivateRoute element={SetHVACPrices} roles={['admin']} />} />
         <Route path="/set-auto-prices" element={<PrivateRoute element={SetAutoPrices} roles={['admin']} />} />
+        <Route path="/view-prices" element={<PrivateRoute element={ViewPrices} roles={['regular']} />} />
+        <Route path="/view-loads" element={<PrivateRoute element={ViewLoads} />} />
       </Routes>
     </Router>
   );
