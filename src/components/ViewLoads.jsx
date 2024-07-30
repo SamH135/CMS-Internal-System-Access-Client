@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
@@ -9,18 +9,18 @@ const ViewLoads = () => {
   const [truckLoads, setTruckLoads] = useState([]);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
-  useEffect(() => {
-    fetchTruckLoads();
-  }, [date]);
-
-  const fetchTruckLoads = async () => {
+  const fetchTruckLoads = useCallback(async () => {
     try {
       const response = await axiosInstance.get(`/api/truckLoads?date=${date}`);
       setTruckLoads(response.data.truckLoads);
     } catch (error) {
       console.error('Error fetching truck loads:', error);
     }
-  };
+  }, [date]);
+
+  useEffect(() => {
+    fetchTruckLoads();
+  }, [fetchTruckLoads]);
 
   return (
     <div>
@@ -54,8 +54,8 @@ const ViewLoads = () => {
               <p>Total Weight: {truck.totalWeight.toFixed(2)} lbs</p>
               <h6>Metal Breakdown:</h6>
               <ul>
-                {Object.entries(truck.metals).map(([metal, weight]) => (
-                  <li key={metal}>{metal}: {parseFloat(weight).toFixed(2)} lbs</li>
+                {Object.entries(truck.metals).map(([category, weight]) => (
+                  <li key={category}>{category}: {parseFloat(weight).toFixed(2)} lbs</li>
                 ))}
               </ul>
               <p>Last Receipt: {formatDate(truck.lastReceiptDate)} at {formatTime(truck.lastReceiptTime)}</p>
