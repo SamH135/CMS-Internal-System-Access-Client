@@ -4,7 +4,8 @@ import { useSelector } from 'react-redux';
 import { jwtDecode } from 'jwt-decode';
 import axiosInstance from '../axiosInstance';
 import Table from './Table';
-import { format, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 
 
 const RequestList = () => {
@@ -66,6 +67,11 @@ const RequestList = () => {
         : [...prev, requestID]
     );
   }, []);
+
+  const formatDate = (dateString) => {
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return formatInTimeZone(parseISO(dateString), userTimeZone, 'MMMM d, yyyy');
+  };
 
   const columns = [
     ...(isAdmin ? [{
@@ -147,7 +153,7 @@ const RequestList = () => {
               columns={columns}
               data={requests.map(request => ({
                 ...request,
-                requestdate: format(parseISO(request.requestdate), 'MMMM d, yyyy')
+                requestdate: formatDate(request.requestdate)
               }))}
               onRowClick={handleRowClick}
             />

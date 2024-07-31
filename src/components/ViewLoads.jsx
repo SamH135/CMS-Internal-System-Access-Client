@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
 import BackArrow from './BackArrow';
-import { formatDate, formatTime } from '../dateUtils';
+import { parseISO } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 
 const ViewLoads = () => {
   const [truckLoads, setTruckLoads] = useState([]);
@@ -21,6 +22,11 @@ const ViewLoads = () => {
   useEffect(() => {
     fetchTruckLoads();
   }, [fetchTruckLoads]);
+
+  const formatDateTime = (dateTimeString) => {
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return formatInTimeZone(parseISO(dateTimeString), userTimeZone, 'MMMM d, yyyy h:mm a');
+  };
 
   return (
     <div>
@@ -58,7 +64,7 @@ const ViewLoads = () => {
                   <li key={category}>{category}: {parseFloat(weight).toFixed(2)} lbs</li>
                 ))}
               </ul>
-              <p>Last Receipt: {formatDate(truck.lastReceiptDate)} at {formatTime(truck.lastReceiptTime)}</p>
+              <p>Last Receipt: {formatDateTime(truck.lastReceiptTime)}</p>
             </div>
           </div>
         ))}

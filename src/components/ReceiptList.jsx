@@ -5,7 +5,8 @@ import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
 import Table from './Table';
 import BackArrow from './BackArrow';
-import { format, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 
 
 const ReceiptList = () => {
@@ -38,6 +39,11 @@ const ReceiptList = () => {
     } catch (error) {
       console.error('Error searching receipts:', error);
     }
+  };
+
+  const formatDate = (dateString) => {
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return formatInTimeZone(parseISO(dateString), userTimeZone, 'MMMM d, yyyy');
   };
 
   const handleReceiptClick = (receiptID) => {
@@ -97,7 +103,7 @@ const ReceiptList = () => {
               ]}
               data={receipts.map((receipt) => ({
                 ...receipt,
-                pickupdate: format(parseISO(receipt.pickupdate), 'MMMM d, yyyy'),
+                pickupdate: formatDate(receipt.pickupdate),
               }))}
               onRowClick={(receipt) => handleReceiptClick(receipt.receiptid)}
             />

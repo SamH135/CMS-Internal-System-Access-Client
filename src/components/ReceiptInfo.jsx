@@ -6,7 +6,8 @@ import Logout from './Logout';
 import GenericPieChart from './GenericPieChart';
 import Table from './Table';
 import BackArrow from './BackArrow';
-import { format, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 
 const ReceiptInfo = () => {
   const [receipt, setReceipt] = useState(null);
@@ -189,9 +190,9 @@ const ReceiptInfo = () => {
     return value !== null && value !== undefined ? `${parseFloat(value).toFixed(2)} lbs` : 'N/A';
   };
 
-  const formatTime = (timeString) => {
-    const date = parseISO(timeString);
-    return format(date, 'h:mm a (zzz)');
+  const formatDateTime = (dateTimeString) => {
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return formatInTimeZone(parseISO(dateTimeString), userTimeZone, 'MMMM d, yyyy h:mm a (zzz)');
   };
 
   if (!receipt) {
@@ -232,8 +233,7 @@ const ReceiptInfo = () => {
                 <p>Payment Method: {receipt.paymentmethod || 'N/A'}</p>
                 <p>Total Volume: {formatWeight(receipt.totalvolume)}</p>
                 <p>Total Payout: {formatCurrency(receipt.totalpayout)}</p>
-                <p>Pickup Date: {new Date(receipt.pickupdate).toLocaleDateString()}</p>
-                <p>Pickup Time: {formatTime(receipt.pickuptime)}</p>
+                <p>Pickup Date and Time: {formatDateTime(receipt.pickuptime)}</p>
                 <p>Created By: {receipt.createdby}</p>
               </div>
             </div>

@@ -1,3 +1,5 @@
+// src/components/ClientInfo.jsx
+
 import React, { useEffect, useState, useReducer } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -6,7 +8,9 @@ import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
 import GenericPieChart from './GenericPieChart';
 import BackArrow from './BackArrow';
-import { format, parseISO, differenceInDays, startOfDay } from 'date-fns';
+import { parseISO, differenceInDays, startOfDay } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
+
 
 const feeReducer = (state, action) => {
   switch (action.type) {
@@ -163,11 +167,19 @@ const ClientInfo = () => {
     }
   };
 
+  const formatDate = (dateString) => {
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return formatInTimeZone(parseISO(dateString), userTimeZone, 'yyyy-MM-dd');
+  };
+  
   const daysSinceLastPickup = () => {
     if (!totals.lastpickupdate) return 'N/A';
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const lastPickup = parseISO(totals.lastpickupdate);
     const today = startOfDay(new Date());
-    return differenceInDays(today, lastPickup);
+    const zonedLastPickup = formatInTimeZone(lastPickup, userTimeZone, 'yyyy-MM-dd');
+    const zonedToday = formatInTimeZone(today, userTimeZone, 'yyyy-MM-dd');
+    return differenceInDays(parseISO(zonedToday), parseISO(zonedLastPickup));
   };
   
   const daysOverdue = () => {
@@ -222,7 +234,7 @@ const ClientInfo = () => {
           <h5>Pickup Information</h5>
         </div>
         <div className="card-body">
-          <p>Last Pickup Date: {totals.lastpickupdate ? new Date(totals.lastpickupdate).toLocaleDateString() : 'N/A'}</p>
+          <p>Last Pickup Date: {totals.lastpickupdate ? formatDate(totals.lastpickupdate) : 'N/A'}</p>
           <p>Days Since Last Pickup: {daysSinceLastPickup()}</p>
           <p>Days Overdue for Pickup: {daysOverdue()}</p>
           <p>
@@ -398,7 +410,7 @@ const ClientInfo = () => {
                           className="form-control"
                           name={key}
                           id={key}
-                          value={type === 'date' ? format(parseISO(client[key]), 'yyyy-MM-dd') : (client[key] || '')}
+                          value={type === 'date' ? formatDate(client[key]) : (client[key] || '')}
                           checked={type === 'checkbox' ? Boolean(client[key]) : undefined}
                           onChange={handleInputChange}
                           readOnly={!isEditing || key === 'clientid'}

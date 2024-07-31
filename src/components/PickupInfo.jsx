@@ -9,6 +9,7 @@ import { Alert } from 'react-bootstrap';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { parseISO, format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isSameDay, isWithinInterval } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 
 const getStartOfWeek = (date) => startOfWeek(date, { weekStartsOn: 1 });
 const getEndOfWeek = (date) => endOfWeek(date, { weekStartsOn: 1 });
@@ -64,6 +65,12 @@ const PickupInfo = () => {
     };
   }, [receipts]);
 
+  const formatDateTime = (dateTimeString) => {
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return formatInTimeZone(parseISO(dateTimeString), userTimeZone, 'MMMM d, yyyy h:mm a');
+  };
+  
+
   const handleClientSearch = async () => {
     if (!clientSearchTerm.trim()) return;
     setIsLoading(true);
@@ -114,14 +121,13 @@ const PickupInfo = () => {
             columns={[
               { header: 'Client Name', field: 'clientname' },
               { header: 'Location', field: 'clientlocation' },
-              { header: 'Pickup Date', field: 'pickupdate' },
+              
               { header: 'Pickup Time', field: 'pickuptime' },
               { header: 'Created By', field: 'createdby' },
             ]}
             data={data.map((receipt) => ({
               ...receipt,
-              pickupdate: format(parseISO(receipt.pickupdate), 'MMMM d, yyyy'),
-              pickuptime: format(parseISO(receipt.pickuptime), 'h:mm a'),
+              pickuptime: formatDateTime(receipt.pickuptime),
             }))}
             onRowClick={handleRowClick}
           />
