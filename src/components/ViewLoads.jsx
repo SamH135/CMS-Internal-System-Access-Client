@@ -9,23 +9,28 @@ import { formatInTimeZone } from 'date-fns-tz';
 const ViewLoads = () => {
   const [truckLoads, setTruckLoads] = useState([]);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const fetchTruckLoads = useCallback(async () => {
     try {
-      const response = await axiosInstance.get(`/api/truckLoads?date=${date}`);
+      const response = await axiosInstance.get(`/api/truckLoads`, {
+        params: {
+          date: date,
+          timeZone: timeZone
+        }
+      });
       setTruckLoads(response.data.truckLoads);
     } catch (error) {
       console.error('Error fetching truck loads:', error);
     }
-  }, [date]);
+  }, [date, timeZone]);
 
   useEffect(() => {
     fetchTruckLoads();
   }, [fetchTruckLoads]);
 
   const formatDateTime = (dateTimeString) => {
-    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    return formatInTimeZone(parseISO(dateTimeString), userTimeZone, 'MMMM d, yyyy h:mm a');
+    return formatInTimeZone(parseISO(dateTimeString), timeZone, 'MMMM d, yyyy h:mm a');
   };
 
   return (
