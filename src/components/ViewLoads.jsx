@@ -19,6 +19,7 @@ const ViewLoads = () => {
           timeZone: timeZone
         }
       });
+      console.log('Sending to backend:', { date, timeZone });
       setTruckLoads(response.data.truckLoads);
     } catch (error) {
       console.error('Error fetching truck loads:', error);

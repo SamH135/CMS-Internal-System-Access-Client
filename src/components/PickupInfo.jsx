@@ -101,7 +101,13 @@ const PickupInfo = () => {
     setIsLoading(true);
     try {
       const formattedDate = format(selectedDate, 'yyyy-MM-dd');
-      const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/searchPickups?date=${formattedDate}`);
+      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/searchPickups`, {
+        params: {
+          date: formattedDate,
+          timeZone: timeZone
+        }
+      });
       const results = response.data.receipts || [];
       setSearchResults(results);
       setShowDateAlert(results.length === 0);
