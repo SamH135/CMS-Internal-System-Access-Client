@@ -191,6 +191,7 @@ const ReceiptInfo = () => {
   };
 
   const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString) return 'N/A';
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     return formatInTimeZone(parseISO(dateTimeString), userTimeZone, 'MMMM d, yyyy h:mm a (zzz)');
   };

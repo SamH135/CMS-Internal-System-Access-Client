@@ -68,9 +68,10 @@ const RequestList = () => {
     );
   }, []);
 
-  const formatDate = (dateString) => {
+  const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString) return 'N/A';
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    return formatInTimeZone(parseISO(dateString), userTimeZone, 'MMMM d, yyyy');
+    return formatInTimeZone(parseISO(dateTimeString), userTimeZone, 'MMMM d, yyyy h:mm a');
   };
 
   const columns = [
@@ -93,7 +94,7 @@ const RequestList = () => {
       ),
     }] : []),
     { header: 'Client Name', field: 'clientname' },
-    { header: 'Request Date', field: 'requestdate' }
+    { header: 'Request Time', field: 'requestdate' }
   ];
 
   const handleRowClick = useCallback((row, e) => {
@@ -153,7 +154,7 @@ const RequestList = () => {
               columns={columns}
               data={requests.map(request => ({
                 ...request,
-                requestdate: formatDate(request.requestdate)
+                requestdate: formatDateTime(request.requesttime) // Assuming there's a requesttime field
               }))}
               onRowClick={handleRowClick}
             />

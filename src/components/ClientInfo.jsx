@@ -9,7 +9,7 @@ import Logout from './Logout';
 import GenericPieChart from './GenericPieChart';
 import BackArrow from './BackArrow';
 import { parseISO, differenceInDays, startOfDay } from 'date-fns';
-import { formatInTimeZone } from 'date-fns-tz';
+import { toZonedTime, formatInTimeZone } from 'date-fns-tz';
 
 
 const feeReducer = (state, action) => {
@@ -168,18 +168,23 @@ const ClientInfo = () => {
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     return formatInTimeZone(parseISO(dateString), userTimeZone, 'yyyy-MM-dd');
   };
   
-  const daysSinceLastPickup = () => {
-    if (!totals.lastpickupdate) return 'N/A';
+  const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString) return 'N/A';
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const lastPickup = parseISO(totals.lastpickupdate);
-    const today = startOfDay(new Date());
-    const zonedLastPickup = formatInTimeZone(lastPickup, userTimeZone, 'yyyy-MM-dd');
-    const zonedToday = formatInTimeZone(today, userTimeZone, 'yyyy-MM-dd');
-    return differenceInDays(parseISO(zonedToday), parseISO(zonedLastPickup));
+    return formatInTimeZone(parseISO(dateTimeString), userTimeZone, 'MMMM d, yyyy h:mm a');
+  };
+  
+  const daysSinceLastPickup = () => {
+    if (!totals.lastpickuptime) return 'N/A';
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const lastPickup = toZonedTime(parseISO(totals.lastpickuptime), userTimeZone);
+    const today = toZonedTime(startOfDay(new Date()), userTimeZone);
+    return differenceInDays(today, lastPickup);
   };
   
   const daysOverdue = () => {
@@ -234,7 +239,7 @@ const ClientInfo = () => {
           <h5>Pickup Information</h5>
         </div>
         <div className="card-body">
-          <p>Last Pickup Date: {totals.lastpickupdate ? formatDate(totals.lastpickupdate) : 'N/A'}</p>
+          <p>Last Pickup Date: {totals.lastpickuptime ? formatDateTime(totals.lastpickuptime) : 'N/A'}</p>
           <p>Days Since Last Pickup: {daysSinceLastPickup()}</p>
           <p>Days Overdue for Pickup: {daysOverdue()}</p>
           <p>

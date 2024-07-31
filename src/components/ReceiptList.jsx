@@ -41,9 +41,10 @@ const ReceiptList = () => {
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString) return 'N/A';
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    return formatInTimeZone(parseISO(dateString), userTimeZone, 'MMMM d, yyyy');
+    return formatInTimeZone(parseISO(dateTimeString), userTimeZone, 'MMMM d, yyyy h:mm a');
   };
 
   const handleReceiptClick = (receiptID) => {
@@ -98,12 +99,12 @@ const ReceiptList = () => {
               columns={[
                 { header: 'Receipt ID', field: 'receiptid' },
                 { header: 'Client Name', field: 'clientname' },
-                { header: 'Pickup Date', field: 'pickupdate' },
+                { header: 'Pickup Time', field: 'pickuptime' },
                 { header: 'Total Payout', field: 'totalpayout', formatter: (value) => `$${value.toFixed(2)}` },
               ]}
               data={receipts.map((receipt) => ({
                 ...receipt,
-                pickupdate: formatDate(receipt.pickupdate),
+                pickuptime: formatDateTime(receipt.pickuptime),
               }))}
               onRowClick={(receipt) => handleReceiptClick(receipt.receiptid)}
             />
