@@ -6,10 +6,14 @@ import axiosInstance from '../axiosInstance';
 import Table from './Table';
 import BackArrow from './BackArrow';
 import { Alert } from 'react-bootstrap';
-import { formatDate, formatTime, getStartOfWeek, getEndOfWeek } from '../dateUtils';
+//import { parseUTCDate, formatDate, formatTime, getStartOfWeek, getEndOfWeek } from '../dateUtils';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { parseISO, format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isSameDay, isWithinInterval } from 'date-fns';
 
+
+const getStartOfWeek = (date) => startOfWeek(date, { weekStartsOn: 1 });
+const getEndOfWeek = (date) => endOfWeek(date, { weekStartsOn: 1 });
 
 const PickupInfo = () => {
   const [pickupsToday, setPickupsToday] = useState([]);
@@ -38,32 +42,32 @@ const PickupInfo = () => {
       }
   
       const today = new Date();
-      today.setHours(0, 0, 0, 0);  // Use local time instead of UTC
-      
-      const startOfWeek = getStartOfWeek(today);
-      const endOfWeek = getEndOfWeek(today);
+      const startOfWeekDate = getStartOfWeek(today);
+      const endOfWeekDate = getEndOfWeek(today);
+      const startOfMonthDate = startOfMonth(today);
+      const endOfMonthDate = endOfMonth(today);
   
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-  
-      setPickupsToday(receipts.filter(receipt => {
-        const pickupDate = new Date(receipt.pickupdate);
-        pickupDate.setHours(0, 0, 0, 0);  // Use local time for comparison
-        return pickupDate.getTime() === today.getTime();
-      }));
-  
-      setPickupsThisWeek(receipts.filter(receipt => {
-        const pickupDate = new Date(receipt.pickupdate);
-        return pickupDate >= startOfWeek && pickupDate <= endOfWeek;
-      }));
-  
-      setPickupsThisMonth(receipts.filter(receipt => {
-        const pickupDate = new Date(receipt.pickupdate);
-        return pickupDate >= startOfMonth && pickupDate <= endOfMonth;
-      }));
+      setPickupsToday(receipts.filter(receipt => isSameDay(parseISO(receipt.pickupdate), today)));
+      setPickupsThisWeek(receipts.filter(receipt => 
+        isWithinInterval(parseISO(receipt.pickupdate), { start: startOfWeekDate, end: endOfWeekDate })
+      ));
+      setPickupsThisMonth(receipts.filter(receipt => 
+        isWithinInterval(parseISO(receipt.pickupdate), { start: startOfMonthDate, end: endOfMonthDate })
+      ));
     } catch (error) {
       console.error('Error retrieving pickup information:', error);
     }
+  };
+  
+  // Update the formatDate and formatTime functions:
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return format(parseISO(dateString), 'MMMM d, yyyy');
+  };
+  
+  const formatTime = (timeString) => {
+    if (!timeString) return 'N/A';
+    return format(parseISO(timeString), 'h:mm a');
   };
   
   const handleClientSearch = async () => {

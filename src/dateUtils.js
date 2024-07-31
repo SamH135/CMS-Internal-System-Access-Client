@@ -1,10 +1,11 @@
 // dateUtils.js
 
 export const parseUTCDate = (dateString) => {
-  if (!dateString) return null;
-  const date = new Date(dateString);
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-};
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  };
+  
   export const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = parseUTCDate(dateString);
@@ -48,16 +49,16 @@ export const parseUTCDate = (dateString) => {
 
   export const getStartOfWeek = (date) => {
     const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
-    return new Date(d.setDate(diff));
+    d.setUTCHours(0, 0, 0, 0);
+    const day = d.getUTCDay();
+    const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
+    return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), diff));
   };
   
   export const getEndOfWeek = (date) => {
     const d = new Date(date);
-    d.setHours(23, 59, 59, 999);
-    const day = d.getDay();
-    const diff = d.getDate() + (7 - day);
-    return new Date(d.setDate(diff));
+    d.setUTCHours(23, 59, 59, 999);
+    const day = d.getUTCDay();
+    const diff = d.getUTCDate() + (7 - day);
+    return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), diff));
   };
