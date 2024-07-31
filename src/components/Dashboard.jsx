@@ -102,6 +102,18 @@ const Dashboard = () => {
                   </div>
                 </Link>
               </div>
+              {userType === 'admin' && (
+                <div className="col-sm-6 mb-4">
+                  <Link to="/generate-csv" className="card-link">
+                    <div className="card inner-card">
+                      <div className="card-body d-flex justify-content-between align-items-center">
+                        <h5 className="card-title mb-0">Generate CSV</h5>
+                        <img src="/csv_icon.png" alt="CSV icon" className="card-icon" />
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
