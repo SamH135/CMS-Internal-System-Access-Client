@@ -8,11 +8,9 @@ import BackArrow from './BackArrow';
 import { Alert } from 'react-bootstrap';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { parseISO, format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isSameDay, isWithinInterval } from 'date-fns';
+import { parseISO, format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { toZonedTime, formatInTimeZone } from 'date-fns-tz';
 
-const getStartOfWeek = (date) => startOfWeek(date, { weekStartsOn: 1 });
-const getEndOfWeek = (date) => endOfWeek(date, { weekStartsOn: 1 });
 
 const PickupInfo = () => {
   const [receipts, setReceipts] = useState([]);
@@ -47,33 +45,36 @@ const PickupInfo = () => {
     }
   };
 
+
   const filteredPickups = useMemo(() => {
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const today = toZonedTime(new Date(), userTimeZone);
-    const startOfWeekDate = toZonedTime(getStartOfWeek(today), userTimeZone);
-    const endOfWeekDate = toZonedTime(getEndOfWeek(today), userTimeZone);
-    const startOfMonthDate = toZonedTime(startOfMonth(today), userTimeZone);
-    const endOfMonthDate = toZonedTime(endOfMonth(today), userTimeZone);
+    const now = new Date();
+    const todayStart = startOfDay(toZonedTime(now, userTimeZone));
+    const todayEnd = endOfDay(toZonedTime(now, userTimeZone));
+    const weekStart = startOfWeek(toZonedTime(now, userTimeZone), { weekStartsOn: 1 });
+    const weekEnd = endOfWeek(toZonedTime(now, userTimeZone), { weekStartsOn: 1 });
+    const monthStart = startOfMonth(toZonedTime(now, userTimeZone));
+    const monthEnd = endOfMonth(toZonedTime(now, userTimeZone));
+  
+    const filterByInterval = (receipt, start, end) => {
+      if (!receipt.pickuptime) return false;
+      const pickupTime = toZonedTime(parseISO(receipt.pickuptime), userTimeZone);
+      return isWithinInterval(pickupTime, { start, end });
+    };
   
     return {
-      today: receipts.filter(receipt => {
-        const pickupDate = toZonedTime(parseISO(receipt.pickupdate), userTimeZone);
-        return isSameDay(pickupDate, today);
-      }),
-      thisWeek: receipts.filter(receipt => {
-        const pickupDate = toZonedTime(parseISO(receipt.pickupdate), userTimeZone);
-        return isWithinInterval(pickupDate, { start: startOfWeekDate, end: endOfWeekDate });
-      }),
-      thisMonth: receipts.filter(receipt => {
-        const pickupDate = toZonedTime(parseISO(receipt.pickupdate), userTimeZone);
-        return isWithinInterval(pickupDate, { start: startOfMonthDate, end: endOfMonthDate });
-      })
+      today: receipts.filter(receipt => filterByInterval(receipt, todayStart, todayEnd)),
+      thisWeek: receipts.filter(receipt => filterByInterval(receipt, weekStart, weekEnd)),
+      thisMonth: receipts.filter(receipt => filterByInterval(receipt, monthStart, monthEnd))
     };
   }, [receipts]);
   
-  const formatDateTime = (dateTimeString) => {
+  const formatDateTime = (receipt) => {
+    if (!receipt || !receipt.pickuptime) {
+      return 'N/A'; // or any default value you prefer
+    }
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    return formatInTimeZone(parseISO(dateTimeString), userTimeZone, 'MMMM d, yyyy h:mm a');
+    return formatInTimeZone(parseISO(receipt.pickuptime), userTimeZone, 'MMMM d, yyyy h:mm a');
   };
   
   
@@ -134,7 +135,7 @@ const PickupInfo = () => {
             ]}
             data={data.map((receipt) => ({
               ...receipt,
-              pickuptime: formatDateTime(receipt.pickuptime),
+              pickuptime: receipt.pickuptime ? formatDateTime(receipt) : 'N/A',
             }))}
             onRowClick={handleRowClick}
           />
