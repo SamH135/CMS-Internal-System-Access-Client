@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { jwtDecode } from 'jwt-decode';
 import axiosInstance from '../axiosInstance';
 import Table from './Table';
-import { formatDate } from '../dateUtils';
+import { format, parseISO } from 'date-fns';
 
 
 const RequestList = () => {
@@ -147,7 +147,7 @@ const RequestList = () => {
               columns={columns}
               data={requests.map(request => ({
                 ...request,
-                requestdate: formatDate(request.requestdate)
+                requestdate: format(parseISO(request.requestdate), 'MMMM d, yyyy')
               }))}
               onRowClick={handleRowClick}
             />

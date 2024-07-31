@@ -6,7 +6,7 @@ import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
 import GenericPieChart from './GenericPieChart';
 import BackArrow from './BackArrow';
-import { formatDateForInput, parseUTCDate } from '../dateUtils';
+import { format, parseISO, differenceInDays, startOfDay } from 'date-fns';
 
 const feeReducer = (state, action) => {
   switch (action.type) {
@@ -165,18 +165,11 @@ const ClientInfo = () => {
 
   const daysSinceLastPickup = () => {
     if (!totals.lastpickupdate) return 'N/A';
-    const lastPickup = parseUTCDate(totals.lastpickupdate);
-    const today = new Date();
-    
-    lastPickup.setUTCHours(0, 0, 0, 0);
-    today.setUTCHours(0, 0, 0, 0);
-    
-    const diffTime = Math.abs(today - lastPickup);
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
-    return diffDays;
+    const lastPickup = parseISO(totals.lastpickupdate);
+    const today = startOfDay(new Date());
+    return differenceInDays(today, lastPickup);
   };
-
+  
   const daysOverdue = () => {
     const daysSince = daysSinceLastPickup();
     if (daysSince === 'N/A' || !client.avgtimebetweenpickups) return 'N/A';
@@ -405,7 +398,7 @@ const ClientInfo = () => {
                           className="form-control"
                           name={key}
                           id={key}
-                          value={type === 'date' ? formatDateForInput(client[key]) : (client[key] || '')}
+                          value={type === 'date' ? format(parseISO(client[key]), 'yyyy-MM-dd') : (client[key] || '')}
                           checked={type === 'checkbox' ? Boolean(client[key]) : undefined}
                           onChange={handleInputChange}
                           readOnly={!isEditing || key === 'clientid'}

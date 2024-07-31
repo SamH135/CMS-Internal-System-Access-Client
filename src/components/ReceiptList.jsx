@@ -5,7 +5,7 @@ import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
 import Table from './Table';
 import BackArrow from './BackArrow';
-import { formatDate } from '../dateUtils';
+import { format, parseISO } from 'date-fns';
 
 
 const ReceiptList = () => {
@@ -97,7 +97,7 @@ const ReceiptList = () => {
               ]}
               data={receipts.map((receipt) => ({
                 ...receipt,
-                pickupdate: formatDate(receipt.pickupdate),
+                pickupdate: format(parseISO(receipt.pickupdate), 'MMMM d, yyyy'),
               }))}
               onRowClick={(receipt) => handleReceiptClick(receipt.receiptid)}
             />

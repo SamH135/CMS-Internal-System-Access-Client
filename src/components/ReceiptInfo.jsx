@@ -6,7 +6,7 @@ import Logout from './Logout';
 import GenericPieChart from './GenericPieChart';
 import Table from './Table';
 import BackArrow from './BackArrow';
-import { formatTime } from '../dateUtils';
+import { format, parseISO } from 'date-fns';
 
 const ReceiptInfo = () => {
   const [receipt, setReceipt] = useState(null);
@@ -187,6 +187,11 @@ const ReceiptInfo = () => {
   
   const formatWeight = (value) => {
     return value !== null && value !== undefined ? `${parseFloat(value).toFixed(2)} lbs` : 'N/A';
+  };
+
+  const formatTime = (timeString) => {
+    const date = parseISO(timeString);
+    return format(date, 'h:mm a (zzz)');
   };
 
   if (!receipt) {
