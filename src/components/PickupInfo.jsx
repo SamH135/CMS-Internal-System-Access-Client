@@ -6,7 +6,7 @@ import axiosInstance from '../axiosInstance';
 import Table from './Table';
 import BackArrow from './BackArrow';
 import { Alert } from 'react-bootstrap';
-import { parseUTCDate, formatDate, formatTime, getStartOfWeek, getEndOfWeek } from '../dateUtils';
+import { formatDate, formatTime, getStartOfWeek, getEndOfWeek } from '../dateUtils';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -38,24 +38,27 @@ const PickupInfo = () => {
       }
   
       const today = new Date();
-      today.setUTCHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);  // Use local time instead of UTC
       
       const startOfWeek = getStartOfWeek(today);
       const endOfWeek = getEndOfWeek(today);
   
-      const startOfMonth = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
-      const endOfMonth = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + 1, 0));
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
   
       setPickupsToday(receipts.filter(receipt => {
-        const pickupDate = parseUTCDate(receipt.pickupdate);
+        const pickupDate = new Date(receipt.pickupdate);
+        pickupDate.setHours(0, 0, 0, 0);  // Use local time for comparison
         return pickupDate.getTime() === today.getTime();
       }));
+  
       setPickupsThisWeek(receipts.filter(receipt => {
-        const pickupDate = parseUTCDate(receipt.pickupdate);
+        const pickupDate = new Date(receipt.pickupdate);
         return pickupDate >= startOfWeek && pickupDate <= endOfWeek;
       }));
+  
       setPickupsThisMonth(receipts.filter(receipt => {
-        const pickupDate = parseUTCDate(receipt.pickupdate);
+        const pickupDate = new Date(receipt.pickupdate);
         return pickupDate >= startOfMonth && pickupDate <= endOfMonth;
       }));
     } catch (error) {
