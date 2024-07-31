@@ -1,29 +1,26 @@
 // src/components/PickupInfo.jsx
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosInstance';
 import Table from './Table';
 import BackArrow from './BackArrow';
 import { Alert } from 'react-bootstrap';
-//import { parseUTCDate, formatDate, formatTime, getStartOfWeek, getEndOfWeek } from '../dateUtils';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { parseISO, format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isSameDay, isWithinInterval } from 'date-fns';
-
 
 const getStartOfWeek = (date) => startOfWeek(date, { weekStartsOn: 1 });
 const getEndOfWeek = (date) => endOfWeek(date, { weekStartsOn: 1 });
 
 const PickupInfo = () => {
-  const [pickupsToday, setPickupsToday] = useState([]);
-  const [pickupsThisWeek, setPickupsThisWeek] = useState([]);
-  const [pickupsThisMonth, setPickupsThisMonth] = useState([]);
+  const [receipts, setReceipts] = useState([]);
   const [clientSearchTerm, setClientSearchTerm] = useState('');
   const [dateSearchTerm, setDateSearchTerm] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [showClientAlert, setShowClientAlert] = useState(false);
   const [showDateAlert, setShowDateAlert] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,47 +28,45 @@ const PickupInfo = () => {
   }, []);
 
   const fetchPickupInfo = async () => {
+    setIsLoading(true);
     try {
       const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/pickupInfo`);
       console.log('Pickup Info Response:', response.data);
-  
-      const receipts = response.data.receipts || [];
-      if (!Array.isArray(receipts)) {
-        console.error('Receipt data is not an array:', receipts);
+
+      const fetchedReceipts = response.data.receipts || [];
+      if (!Array.isArray(fetchedReceipts)) {
+        console.error('Receipt data is not an array:', fetchedReceipts);
         return;
       }
-  
-      const today = new Date();
-      const startOfWeekDate = getStartOfWeek(today);
-      const endOfWeekDate = getEndOfWeek(today);
-      const startOfMonthDate = startOfMonth(today);
-      const endOfMonthDate = endOfMonth(today);
-  
-      setPickupsToday(receipts.filter(receipt => isSameDay(parseISO(receipt.pickupdate), today)));
-      setPickupsThisWeek(receipts.filter(receipt => 
-        isWithinInterval(parseISO(receipt.pickupdate), { start: startOfWeekDate, end: endOfWeekDate })
-      ));
-      setPickupsThisMonth(receipts.filter(receipt => 
-        isWithinInterval(parseISO(receipt.pickupdate), { start: startOfMonthDate, end: endOfMonthDate })
-      ));
+      setReceipts(fetchedReceipts);
     } catch (error) {
       console.error('Error retrieving pickup information:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
-  
-  // Update the formatDate and formatTime functions:
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return format(parseISO(dateString), 'MMMM d, yyyy');
-  };
-  
-  const formatTime = (timeString) => {
-    if (!timeString) return 'N/A';
-    return format(parseISO(timeString), 'h:mm a');
-  };
-  
+
+  const filteredPickups = useMemo(() => {
+    const today = new Date();
+    const startOfWeekDate = getStartOfWeek(today);
+    const endOfWeekDate = getEndOfWeek(today);
+    const startOfMonthDate = startOfMonth(today);
+    const endOfMonthDate = endOfMonth(today);
+
+    return {
+      today: receipts.filter(receipt => isSameDay(parseISO(receipt.pickupdate), today)),
+      thisWeek: receipts.filter(receipt => 
+        isWithinInterval(parseISO(receipt.pickupdate), { start: startOfWeekDate, end: endOfWeekDate })
+      ),
+      thisMonth: receipts.filter(receipt => 
+        isWithinInterval(parseISO(receipt.pickupdate), { start: startOfMonthDate, end: endOfMonthDate })
+      )
+    };
+  }, [receipts]);
+
   const handleClientSearch = async () => {
     if (!clientSearchTerm.trim()) return;
+    setIsLoading(true);
     try {
       const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/searchPickups?term=${encodeURIComponent(clientSearchTerm)}`);
       const results = response.data.receipts || [];
@@ -81,13 +76,16 @@ const PickupInfo = () => {
     } catch (error) {
       console.error('Error searching pickups by client:', error);
       setShowClientAlert(true);
+    } finally {
+      setIsLoading(false);
     }
   };
-  
+
   const handleDateSearch = async (selectedDate = dateSearchTerm) => {
     if (!selectedDate) return;
+    setIsLoading(true);
     try {
-      const formattedDate = selectedDate.toISOString().split('T')[0];
+      const formattedDate = format(selectedDate, 'yyyy-MM-dd');
       const response = await axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/searchPickups?date=${formattedDate}`);
       const results = response.data.receipts || [];
       setSearchResults(results);
@@ -96,6 +94,8 @@ const PickupInfo = () => {
     } catch (error) {
       console.error('Error searching pickups by date:', error);
       setShowDateAlert(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -120,8 +120,8 @@ const PickupInfo = () => {
             ]}
             data={data.map((receipt) => ({
               ...receipt,
-              pickupdate: formatDate(receipt.pickupdate),
-              pickuptime: formatTime(receipt.pickuptime),
+              pickupdate: format(parseISO(receipt.pickupdate), 'MMMM d, yyyy'),
+              pickuptime: format(parseISO(receipt.pickuptime), 'h:mm a'),
             }))}
             onRowClick={handleRowClick}
           />
@@ -200,16 +200,17 @@ const PickupInfo = () => {
                     <h5 className="card-title"><strong>Search by Date</strong></h5>
                     <p className="card-text">Returns all pickups for a given date.</p>
                     <div className="search-container date-search-container">
-                    <DatePicker
-                      selected={dateSearchTerm}
-                      onChange={(date) => {
-                        setDateSearchTerm(date);
-                        handleDateSearch(date);  // Call the search function directly when a date is selected
-                      }}
-                      className="form-control"
-                      placeholderText="Select a date"
-                      dateFormat="yyyy-MM-dd"
-                    />
+                      <DatePicker
+                        selected={dateSearchTerm}
+                        onChange={(date) => {
+                          setDateSearchTerm(date);
+                          handleDateSearch(date);
+                        }}
+                        className="form-control"
+                        placeholderText="Select a date"
+                        dateFormat="yyyy-MM-dd"
+                        maxDate={new Date()}
+                      />
                       <img 
                         src="/search_button_icon.png" 
                         alt="Search" 
@@ -243,13 +244,15 @@ const PickupInfo = () => {
           </div>
         </div>
 
-        {searchResults.length > 0 ? (
+        {isLoading ? (
+          <p>Loading...</p>
+        ) : searchResults.length > 0 ? (
           renderTable(searchResults, "Search Results")
         ) : (
           <>
-            {renderTable(pickupsToday, "Today")}
-            {renderTable(pickupsThisWeek, "This Week")}
-            {renderTable(pickupsThisMonth, "This Month")}
+            {renderTable(filteredPickups.today, "Today")}
+            {renderTable(filteredPickups.thisWeek, "This Week")}
+            {renderTable(filteredPickups.thisMonth, "This Month")}
           </>
         )}
       </div>
