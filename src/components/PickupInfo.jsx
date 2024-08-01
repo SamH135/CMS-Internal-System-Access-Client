@@ -7,9 +7,8 @@ import Table from './Table';
 import BackArrow from './BackArrow';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { parseISO, format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import { parseISO, format, startOfDay, endOfDay, subDays, isWithinInterval } from 'date-fns';
 import { toZonedTime, formatInTimeZone } from 'date-fns-tz';
-
 
 const CustomAlert = ({ show, variant, onClose, children }) => {
   if (!show) return null;
@@ -62,10 +61,8 @@ const PickupInfo = () => {
     const now = new Date();
     const todayStart = startOfDay(toZonedTime(now, userTimeZone));
     const todayEnd = endOfDay(toZonedTime(now, userTimeZone));
-    const weekStart = startOfWeek(toZonedTime(now, userTimeZone), { weekStartsOn: 1 });
-    const weekEnd = endOfWeek(toZonedTime(now, userTimeZone), { weekStartsOn: 1 });
-    const monthStart = startOfMonth(toZonedTime(now, userTimeZone));
-    const monthEnd = endOfMonth(toZonedTime(now, userTimeZone));
+    const sevenDaysAgo = subDays(todayStart, 7);
+    const thirtyDaysAgo = subDays(todayStart, 30);
   
     const filterByInterval = (receipt, start, end) => {
       if (!receipt.pickuptime) return false;
@@ -75,8 +72,8 @@ const PickupInfo = () => {
   
     return {
       today: receipts.filter(receipt => filterByInterval(receipt, todayStart, todayEnd)),
-      thisWeek: receipts.filter(receipt => filterByInterval(receipt, weekStart, weekEnd)),
-      thisMonth: receipts.filter(receipt => filterByInterval(receipt, monthStart, monthEnd))
+      lastSevenDays: receipts.filter(receipt => filterByInterval(receipt, sevenDaysAgo, now)),
+      lastThirtyDays: receipts.filter(receipt => filterByInterval(receipt, thirtyDaysAgo, now))
     };
   }, [receipts]);
   
@@ -280,8 +277,8 @@ const PickupInfo = () => {
         ) : (
           <>
             {renderTable(filteredPickups.today, "Today")}
-            {renderTable(filteredPickups.thisWeek, "This Week")}
-            {renderTable(filteredPickups.thisMonth, "This Month")}
+            {renderTable(filteredPickups.lastSevenDays, "Last 7 Days")}
+            {renderTable(filteredPickups.lastThirtyDays, "Last 30 Days")}
           </>
         )}
       </div>
