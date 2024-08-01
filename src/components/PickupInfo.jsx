@@ -5,11 +5,22 @@ import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosInstance';
 import Table from './Table';
 import BackArrow from './BackArrow';
-import { Alert } from 'react-bootstrap';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { parseISO, format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { toZonedTime, formatInTimeZone } from 'date-fns-tz';
+
+
+const CustomAlert = ({ show, variant, onClose, children }) => {
+  if (!show) return null;
+
+  return (
+    <div className={`custom-alert alert-${variant}`}>
+      {children}
+      <button onClick={onClose} className="close-btn">&times;</button>
+    </div>
+  );
+};
 
 
 const PickupInfo = () => {
@@ -205,14 +216,13 @@ const PickupInfo = () => {
                     </div>
                   </div>
                 </div>
-                <Alert 
+                <CustomAlert 
                   show={showClientAlert} 
                   variant="info" 
-                  onClose={() => setShowClientAlert(false)} 
-                  dismissible
+                  onClose={() => setShowClientAlert(false)}
                 >
                   No results found for this client. Try a different client name or location, or use the date search instead.
-                </Alert>
+                </CustomAlert>
               </div>
               <div className="col-md-6 mb-3">
                 <div className="card">
@@ -251,14 +261,13 @@ const PickupInfo = () => {
                     </div>
                   </div>
                 </div>
-                <Alert 
+                <CustomAlert 
                   show={showDateAlert} 
                   variant="info" 
-                  onClose={() => setShowDateAlert(false)} 
-                  dismissible
+                  onClose={() => setShowDateAlert(false)}
                 >
                   No pickups found for this date. Try selecting a different date or use the client search instead.
-                </Alert>
+                </CustomAlert>
               </div>
             </div>
           </div>

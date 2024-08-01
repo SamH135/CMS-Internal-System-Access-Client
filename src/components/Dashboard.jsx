@@ -4,8 +4,74 @@ import { useSelector } from 'react-redux';
 import Logout from './Logout';
 import RequestList from './RequestList';
 
+
 const Dashboard = () => {
   const userType = useSelector((state) => state.auth.userType);
+
+
+  const menuItems = [
+    {
+      to: "/clientList",
+      title: "Clients",
+      description: "View and manage client information",
+      icon: "/client_list_button_icon.png",
+      alt: "Client icon",
+    },
+    {
+      to: "/pickupInfo",
+      title: "Routes",
+      description: "View recent shop pickups",
+      icon: "/route_info_button_icon.png",
+      alt: "Route icon",
+    },
+    {
+      to: "/userDashboard",
+      title: "Users",
+      description: "Manage system users",
+      icon: "/manage_accounts_button_icon.png",
+      alt: "Manage accounts icon",
+      adminOnly: true,
+    },
+    {
+      to: "/set-prices",
+      title: "Set Prices",
+      description: "Update pricing for auto/hvac metals",
+      icon: "/set_prices_icon.png",
+      alt: "Set Prices icon",
+      adminOnly: true,
+    },
+    {
+      to: "/receiptList",
+      title: "Receipts",
+      description: "View and search receipts",
+      icon: "/receipt_log_button_icon.png",
+      alt: "Receipt log icon",
+    },
+    {
+      to: "/view-prices",
+      title: "Prices",
+      description: "View current metal prices",
+      icon: "/view_prices_icon.png",
+      alt: "View Prices icon",
+      regularOnly: true,
+    },
+    {
+      to: "/view-loads",
+      title: "Truck Loads",
+      description: "View load (lbs) on each truck",
+      icon: "/load_weight.png",
+      alt: "load icon",
+    },
+    {
+      to: "/generate-csv",
+      title: "Generate CSV",
+      description: "Download a CSV file for QuickBooks",
+      icon: "/csv_icon.png",
+      alt: "CSV icon",
+      adminOnly: true,
+    },
+  ];
+
 
   return (
     <div>
@@ -16,107 +82,39 @@ const Dashboard = () => {
         </ul>
       </nav>
 
+
       <div className="container mt-4">
         <div className="card outer-card mb-4">
           <div className="card-header text-center">
             Signed in with permission level: <br></br> {userType}
           </div>
 
+
           <div className="card-body">
             <div className="row">
-              <div className="col-sm-6 mb-4">
-                <Link to="/clientList" className="card-link">
-                  <div className="card inner-card">
-                    <div className="card-body d-flex justify-content-between align-items-center">
-                      <h5 className="card-title mb-0">Clients</h5>
-                      <img src="/client_list_button_icon.png" alt="Client icon" className="card-icon" />
-                    </div>
-                  </div>
-                </Link>
-              </div>
-              <div className="col-sm-6 mb-4">
-                <Link to="/pickupInfo" className="card-link">
-                  <div className="card inner-card">
-                    <div className="card-body d-flex justify-content-between align-items-center">
-                      <h5 className="card-title mb-0">Routes</h5>
-                      <img src="/route_info_button_icon.png" alt="Route icon" className="card-icon" />
-                    </div>
-                  </div>
-                </Link>
-              </div>
-            </div>
-            <div className="row">
-              {userType === 'admin' && (
-                <div className="col-sm-6 mb-4">
-                  <Link to="/userDashboard" className="card-link">
-                    <div className="card inner-card">
-                      <div className="card-body d-flex justify-content-between align-items-center">
-                        <h5 className="card-title mb-0">Users</h5>
-                        <img src="/manage_accounts_button_icon.png" alt="Manage accounts icon" className="card-icon" />
+              {menuItems.map((item, index) => (
+                ((item.adminOnly && userType === 'admin') ||
+                 (item.regularOnly && userType === 'regular') ||
+                 (!item.adminOnly && !item.regularOnly)) && (
+                  <div className="col-sm-6 mb-4" key={index}>
+                    <Link to={item.to} className="card-link">
+                      <div className="card inner-card">
+                        <div className="card-body">
+                          <div className="d-flex justify-content-between align-items-center mb-2">
+                            <h5 className="card-title mb-0">{item.title}</h5>
+                            <img src={item.icon} alt={item.alt} className="card-icon" />
+                          </div>
+                          <p className="card-text text-muted">{item.description}</p>
+                        </div>
                       </div>
-                    </div>
-                  </Link>
-                </div>
-              )}
-              {userType === 'admin' && (
-                <div className="col-sm-6 mb-4">
-                  <Link to="/set-prices" className="card-link">
-                    <div className="card inner-card">
-                      <div className="card-body d-flex justify-content-between align-items-center">
-                        <h5 className="card-title mb-0">Set Prices</h5>
-                        <img src="/set_prices_icon.png" alt="Set Prices icon" className="card-icon" />
-                      </div>
-                    </div>
-                  </Link>
-                </div>
-              )}
-              <div className="col-sm-6 mb-4">
-                <Link to="/receiptList" className="card-link">
-                  <div className="card inner-card">
-                    <div className="card-body d-flex justify-content-between align-items-center">
-                      <h5 className="card-title mb-0">Receipts</h5>
-                      <img src="/receipt_log_button_icon.png" alt="Receipt log icon" className="card-icon" />
-                    </div>
+                    </Link>
                   </div>
-                </Link>
-              </div>
-              {userType === 'regular' && (
-                <div className="col-sm-6 mb-4">
-                  <Link to="/view-prices" className="card-link">
-                    <div className="card inner-card">
-                      <div className="card-body d-flex justify-content-between align-items-center">
-                        <h5 className="card-title mb-0">Prices</h5>
-                        <img src="/view_prices_icon.png" alt="View Prices icon" className="card-icon" />
-                      </div>
-                    </div>
-                  </Link>
-                </div>
-              )}
-              <div className="col-sm-6 mb-4">
-                <Link to="/view-loads" className="card-link">
-                  <div className="card inner-card">
-                    <div className="card-body d-flex justify-content-between align-items-center">
-                      <h5 className="card-title mb-0">Loads</h5>
-                      <img src="/load_weight.png" alt="load icon" className="card-icon" />
-                    </div>
-                  </div>
-                </Link>
-              </div>
-              {userType === 'admin' && (
-                <div className="col-sm-6 mb-4">
-                  <Link to="/generate-csv" className="card-link">
-                    <div className="card inner-card">
-                      <div className="card-body d-flex justify-content-between align-items-center">
-                        <h5 className="card-title mb-0">Generate CSV</h5>
-                        <img src="/csv_icon.png" alt="CSV icon" className="card-icon" />
-                      </div>
-                    </div>
-                  </Link>
-                </div>
-              )}
+                )
+              ))}
             </div>
           </div>
         </div>
+
 
         {/* Embedded RequestList */}
         <div className="card outer-card">
@@ -155,4 +153,6 @@ const Dashboard = () => {
   );
 };
 
+
 export default Dashboard;
+
