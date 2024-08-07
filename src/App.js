@@ -27,6 +27,7 @@ import SetAutoPrices from './components/SetAutoPrices';
 import ViewPrices from './components/ViewPrices.jsx';
 import ViewLoads from './components/ViewLoads.jsx';
 import CSVGenerator from './components/CSVGenerator.jsx';
+import UnresolvedChecks from './components/UnresolvedChecks.jsx';
 import { jwtDecode } from 'jwt-decode';
 
 
@@ -105,6 +106,7 @@ function App() {
         <Route path="/view-prices" element={<PrivateRoute element={ViewPrices} roles={['regular']} />} />
         <Route path="/view-loads" element={<PrivateRoute element={ViewLoads} />} />
         <Route path="/generate-csv" element={<PrivateRoute element={CSVGenerator} roles={['admin']} />} />
+        <Route path="/unresolved-checks" element={<PrivateRoute element={UnresolvedChecks} roles={['admin']} />} />
       </Routes>
     </Router>
   );

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { jwtDecode } from 'jwt-decode';
 import axiosInstance from '../axiosInstance';
 import Logout from './Logout';
 import GenericPieChart from './GenericPieChart';
@@ -8,26 +9,29 @@ import Table from './Table';
 import BackArrow from './BackArrow';
 import { parseISO } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
-
 const ReceiptInfo = () => {
   const [receipt, setReceipt] = useState(null);
   const [metals, setMetals] = useState(null);
   const [customMetals, setCustomMetals] = useState([]);
   const [catalyticConverters, setCatalyticConverters] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [checkNumber, setCheckNumber] = useState('');
   const { receiptID } = useParams();
   const navigate = useNavigate();
   const token = useSelector((state) => state.auth.token);
+  const isAdmin = token ? jwtDecode(token).userType === 'admin' : false;
 
   useEffect(() => {
     const fetchReceiptData = async () => {
       try {
-        const [receiptResponse, metalsResponse] = await Promise.all([
+        const [receiptResponse, metalsResponse, checkPaymentResponse] = await Promise.all([
           axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/receiptInfo/${receiptID}`),
-          axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/receiptMetals/${receiptID}`)
+          axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/receiptMetals/${receiptID}`),
+          axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/checkPayment/${receiptID}`)
         ]);
         setReceipt(receiptResponse.data.receipt);
+        setCheckNumber(checkPaymentResponse.data.checkNumber || '');
         
-        // Merge custom metals into metals for 'other' client type
         if (receiptResponse.data.receipt.clienttype === 'other') {
           const customMetalsObj = receiptResponse.data.customMetals.reduce((acc, metal) => {
             acc[metal.metalname] = parseFloat(metal.weight);
@@ -51,6 +55,37 @@ const ReceiptInfo = () => {
       navigate('/login');
     }
   }, [receiptID, token, navigate]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setReceipt(prevReceipt => ({
+      ...prevReceipt,
+      [name]: value
+    }));
+  };
+
+  const handleUpdateReceipt = async (e) => {
+    e.preventDefault();
+    try {
+      await axiosInstance.post(`${process.env.REACT_APP_API_URL}/api/updateReceipt`, receipt);
+      if (checkNumber) {
+        await axiosInstance.post(`${process.env.REACT_APP_API_URL}/api/updateCheckNumber`, {
+          receiptID: receipt.receiptid,
+          checkNumber
+        });
+      }
+      setIsEditing(false);
+      // Refresh the data after update
+      const [updatedReceipt, updatedCheckPayment] = await Promise.all([
+        axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/receiptInfo/${receiptID}`),
+        axiosInstance.get(`${process.env.REACT_APP_API_URL}/api/checkPayment/${receiptID}`)
+      ]);
+      setReceipt(updatedReceipt.data.receipt);
+      setCheckNumber(updatedCheckPayment.data.checkNumber || '');
+    } catch (error) {
+      console.error('Error updating receipt:', error.response?.data || error.message);
+    }
+  };
 
   const renderMetalDistribution = () => {
     if (!receipt || !metals) return <p>No metal distribution data available.</p>;
@@ -196,6 +231,57 @@ const ReceiptInfo = () => {
     return formatInTimeZone(parseISO(dateTimeString), userTimeZone, 'MMMM d, yyyy h:mm a (zzz)');
   };
 
+  const renderEditableFields = () => {
+    return (
+      <form onSubmit={handleUpdateReceipt}>
+        <div className="form-group">
+          <label htmlFor="totalpayout">Total Payout:</label>
+          <input
+            type="number"
+            step="0.01"
+            className="form-control"
+            id="totalpayout"
+            name="totalpayout"
+            value={receipt.totalpayout}
+            onChange={handleInputChange}
+            disabled={!isEditing}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="paymentmethod">Payment Method:</label>
+          <select
+            className="form-control"
+            id="paymentmethod"
+            name="paymentmethod"
+            value={receipt.paymentmethod}
+            onChange={handleInputChange}
+            disabled={!isEditing}
+          >
+            <option value="Cash">Cash</option>
+            <option value="Check">Check</option>
+            <option value="Direct Deposit">Direct Deposit</option>
+          </select>
+        </div>
+        {(receipt.paymentmethod === 'Check' || checkNumber) && (
+          <div className="form-group">
+            <label htmlFor="checknumber">Check Number:</label>
+            <input
+              type="text"
+              className="form-control"
+              id="checknumber"
+              value={checkNumber}
+              onChange={(e) => setCheckNumber(e.target.value)}
+              disabled={!isEditing}
+            />
+          </div>
+        )}
+        {isEditing && (
+          <button type="submit" className="btn btn-primary mt-3">Save Changes</button>
+        )}
+      </form>
+    );
+  };
+
   if (!receipt) {
     return <div>Loading...</div>;
   }
@@ -223,19 +309,26 @@ const ReceiptInfo = () => {
           </div>
           <div className="col-md-6">
             <div className="card mb-4">
-              <div className="card-header">
+              <div className="card-header d-flex justify-content-between align-items-center">
                 <h5>Receipt Details</h5>
+                {isAdmin && (
+                  <button 
+                    className="btn btn-primary" 
+                    onClick={() => setIsEditing(!isEditing)}
+                  >
+                    {isEditing ? 'Cancel' : 'Edit'}
+                  </button>
+                )}
               </div>
               <div className="card-body">
                 <p>Receipt ID: {receipt.receiptid}</p>
                 <p>Client ID: {receipt.clientid}</p>
                 <p>Client Name: {receipt.clientname}</p>
                 <p>Client Type: {receipt.clienttype}</p>
-                <p>Payment Method: {receipt.paymentmethod || 'N/A'}</p>
                 <p>Total Volume: {formatWeight(receipt.totalvolume)}</p>
-                <p>Total Payout: {formatCurrency(receipt.totalpayout)}</p>
                 <p>Pickup Date and Time: {formatDateTime(receipt.pickuptime)}</p>
                 <p>Created By: {receipt.createdby}</p>
+                {renderEditableFields()}
               </div>
             </div>
           </div>

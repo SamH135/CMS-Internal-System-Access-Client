@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosInstance';
 import BackArrow from './BackArrow';
@@ -8,36 +8,19 @@ const SetAutoPrices = () => {
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  const relevantFields = useMemo(() => [
-    'drumsrotorsprice',
-    'shortironprice',
-    'shredsteelprice',
-    'aluminumbreakageprice',
-    'dirtyaluminumradiatorsprice',
-    'wiringharnessprice',
-    'accompressorprice',
-    'alternatorstarterprice',
-    'aluminumrimsprice',
-    'chromerimsprice',
-    'brasscopperradiatorprice'
-  ], []);
 
   useEffect(() => {
     const fetchCurrentPrices = async () => {
       try {
-        const response = await axiosInstance.get('/api/auto-prices');
-        const filteredPrices = {};
-        relevantFields.forEach(field => {
-          filteredPrices[field] = response.data[field] || '';
-        });
-        setPrices(filteredPrices);
+        const response = await axiosInstance.get('/api/auto-prices'); // or '/api/hvac-prices' for SetHVACPrices
+        setPrices(response.data);
       } catch (error) {
-        console.error('Error fetching Auto prices:', error);
+        console.error('Error fetching prices:', error);
         setMessage('Error fetching current prices. Please try again.');
       }
     };
     fetchCurrentPrices();
-  }, [relevantFields]);
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -67,7 +50,7 @@ const SetAutoPrices = () => {
       <form onSubmit={handleSubmit}>
         {Object.entries(prices).map(([key, value]) => (
           <div className="form-group" key={key}>
-            <label htmlFor={key}>{key.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()}:</label>
+            <label htmlFor={key}>{key}:</label>
             <input
               type="number"
               step="0.01"

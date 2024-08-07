@@ -70,6 +70,14 @@ const Dashboard = () => {
       alt: "CSV icon",
       adminOnly: true,
     },
+    {
+      to: "/unresolved-checks",
+      title: "Unresolved Checks",
+      description: "Update check numbers that are undefined",
+      icon: "/check_icon.png",
+      alt: "Check icon",
+      adminOnly: true,
+    },
   ];
 
 
