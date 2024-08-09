@@ -233,6 +233,8 @@ const ClientInfo = () => {
   };
 
   const renderPickupInfo = () => {
+    if (client.clienttype === 'insulation') return null;
+
     return (
       <div className="card mb-4">
         <div className="card-header">
