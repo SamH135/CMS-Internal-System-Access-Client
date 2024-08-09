@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../redux/actions/authActions';
 import { jwtDecode } from 'jwt-decode';
@@ -11,6 +11,14 @@ const Login = () => {
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    if (urlParams.get('session_expired') === 'true') {
+      setMessage('Your session has expired. Please log in again.');
+    }
+  }, [location]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -20,12 +28,16 @@ const Login = () => {
       const decodedToken = jwtDecode(token);
       const userType = decodedToken.userType;
       console.log('Decoded user type:', userType);
+      dispatch(loginSuccess(token, userType));
       localStorage.setItem('token', token);
       localStorage.setItem('userType', userType);
-      dispatch(loginSuccess(token, userType));
       navigate('/dashboard');
     } catch (error) {
-      setMessage('Invalid credentials');
+      if (error.response && error.response.status === 401) {
+        setMessage('Invalid credentials');
+      } else {
+        setMessage('An error occurred. Please try again.');
+      }
     }
   };
 
@@ -60,7 +72,7 @@ const Login = () => {
             </form>
           </div>
         </div>
-        {message && <h4 className="alert alert-danger mt-4">{message}</h4>}
+        {message && <h4 className="alert alert-warning mt-4">{message}</h4>}
       </div>
     </div>
   );

@@ -1,8 +1,21 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+// SessionExpiredModal.jsx
+import React, { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const SessionExpiredModal = ({ show, onHide }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (show && location.pathname === '/login') {
+      // If we're on the login page and the modal should show,
+      // it means we were redirected here due to session expiration
+      const urlParams = new URLSearchParams(location.search);
+      if (!urlParams.get('session_expired')) {
+        navigate('/login?session_expired=true');
+      }
+    }
+  }, [show, location, navigate]);
 
   const handleLogin = () => {
     onHide();
@@ -20,7 +33,6 @@ const SessionExpiredModal = ({ show, onHide }) => {
         </div>
         <div className="modal-body">
           Your session has timed out (sessions last for (1) hour for security purposes). Please log in again to continue.
-          If you're seeing this message and you just logged in, ignore it and click the X at the top.
         </div>
         <div className="modal-footer">
           <button onClick={handleLogin} className="btn-primary">

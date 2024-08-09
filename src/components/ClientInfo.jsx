@@ -381,7 +381,7 @@ const ClientInfo = () => {
                     { label: 'Location Notes', key: 'locationnotes', type: 'textarea' },
                     { label: 'Registration Date', key: 'registrationdate', type: 'date' },
                     { label: 'Location Contact', key: 'locationcontact', type: 'text' },
-                    { label: 'Payment Method', key: 'paymentmethod', type: 'text' },
+                    { label: 'Payment Method', key: 'paymentmethod', type: 'select' }, // Changed to 'select'
                     { label: 'Last Pickup Date', key: 'lastpickupdate', type: 'date' }
                   ].map(({ label, key, type }) => (
                     <div className="form-group" key={key}>
@@ -395,10 +395,20 @@ const ClientInfo = () => {
                           onChange={handleInputChange}
                           disabled={!isEditing || key === 'clientid'}
                         >
-                          <option value="auto">Auto</option>
-                          <option value="hvac">HVAC</option>
-                          <option value="insulation">Insulation</option>
-                          <option value="other">Other</option>
+                          {key === 'clienttype' ? (
+                            <>
+                              <option value="auto">Auto</option>
+                              <option value="hvac">HVAC</option>
+                              <option value="insulation">Insulation</option>
+                              <option value="other">Other</option>
+                            </>
+                          ) : key === 'paymentmethod' ? (
+                            <>
+                              <option value="Cash">Cash</option>
+                              <option value="Check">Check</option>
+                              <option value="Direct Deposit">Direct Deposit</option>
+                            </>
+                          ) : null}
                         </select>
                       ) : type === 'textarea' ? (
                         <textarea
@@ -433,7 +443,7 @@ const ClientInfo = () => {
         </div>
       </div>
     </div>
-  );
-};
-
-export default ClientInfo;
+    );
+  };
+  
+  export default ClientInfo;

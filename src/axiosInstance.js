@@ -1,4 +1,4 @@
-// axiosInstance.js
+// src/axiosInstance.js
 
 import axios from 'axios';
 import store from './redux/store';
@@ -40,12 +40,14 @@ axiosInstance.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    if (error.response && error.response.status === 401 && error.config.url !== '/api/login') {
       store.dispatch(logout());
       window.dispatchEvent(new CustomEvent('sessionExpired'));
+      window.location.href = '/login?session_expired=true';
     }
     return Promise.reject(error);
   }

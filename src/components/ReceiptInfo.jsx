@@ -9,12 +9,18 @@ import Table from './Table';
 import BackArrow from './BackArrow';
 import { parseISO } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
+
+
 const ReceiptInfo = () => {
   const [receipt, setReceipt] = useState(null);
   const [metals, setMetals] = useState(null);
   const [customMetals, setCustomMetals] = useState([]);
   const [catalyticConverters, setCatalyticConverters] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   const [checkNumber, setCheckNumber] = useState('');
   const { receiptID } = useParams();
   const navigate = useNavigate();
@@ -55,6 +61,23 @@ const ReceiptInfo = () => {
       navigate('/login');
     }
   }, [receiptID, token, navigate]);
+
+
+  const handleDeleteReceipt = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async (passcode) => {
+    try {
+      await axiosInstance.delete(`${process.env.REACT_APP_API_URL}/api/deleteReceipt/${receipt.receiptid}`, {
+        data: { passcode }
+      });
+      navigate('/receiptList'); // Redirect after deletion
+    } catch (error) {
+      console.error('Error deleting receipt:', error);
+      // Handle error (e.g., show error message)
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -311,13 +334,23 @@ const ReceiptInfo = () => {
             <div className="card mb-4">
               <div className="card-header d-flex justify-content-between align-items-center">
                 <h5>Receipt Details</h5>
+                
+
                 {isAdmin && (
-                  <button 
-                    className="btn btn-primary" 
-                    onClick={() => setIsEditing(!isEditing)}
-                  >
-                    {isEditing ? 'Cancel' : 'Edit'}
-                  </button>
+                  <div>
+                    <button 
+                      className="btn btn-primary" 
+                      onClick={() => setIsEditing(!isEditing)}
+                    >
+                      {isEditing ? 'Cancel' : 'Edit'}
+                    </button>
+                    <button 
+                      className="btn btn-danger ml-2" 
+                      onClick={handleDeleteReceipt}
+                    >
+                      Delete Receipt
+                    </button>
+                  </div>
                 )}
               </div>
               <div className="card-body">
@@ -334,7 +367,14 @@ const ReceiptInfo = () => {
           </div>
         </div>
       </div>
+      <DeleteConfirmationModal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        itemType="receipt"
+      />
     </div>
+    
   );
 };
 

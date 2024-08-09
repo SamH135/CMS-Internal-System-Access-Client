@@ -8,7 +8,7 @@ const BackArrow = () => {
 
   const handleGoBack = () => {
     // always go back to the main dashboard from these pages
-    if (location.pathname === '/userDashboard' || location.pathname === '/set-prices' || location.pathname === '/clientList' || location.pathname === '/pickupInfo') {
+    if (location.pathname === '/userDashboard' || location.pathname === '/set-prices' || location.pathname === '/clientList' || location.pathname === '/pickupInfo' || location.pathname === '/receiptList' || location.pathname === '/view-loads' || location.pathname === '/unresolved-checks' || location.pathname === '/generate-csv') {
       navigate('/dashboard');
     } else {
       navigate(-1);
