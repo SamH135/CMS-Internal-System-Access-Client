@@ -178,20 +178,26 @@ const ClientInfo = () => {
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     return formatInTimeZone(parseISO(dateTimeString), userTimeZone, 'MMMM d, yyyy h:mm a');
   };
-  
+
   const daysSinceLastPickup = () => {
     if (!totals.lastpickuptime) return 'N/A';
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const lastPickup = toZonedTime(parseISO(totals.lastpickuptime), userTimeZone);
     const today = toZonedTime(startOfDay(new Date()), userTimeZone);
-    return differenceInDays(today, lastPickup);
+    return differenceInDays(today, lastPickup) + 1; // Add 1 to include the pickup day
   };
-  
+
   const daysOverdue = () => {
     const daysSince = daysSinceLastPickup();
     if (daysSince === 'N/A' || !client.avgtimebetweenpickups) return 'N/A';
     const overdueDays = daysSince - client.avgtimebetweenpickups;
     return overdueDays > 0 ? overdueDays : 0;
+  };
+
+  const needsPickup = () => {
+    const daysSince = daysSinceLastPickup();
+    if (daysSince === 'N/A' || !client.avgtimebetweenpickups) return false;
+    return daysSince >= client.avgtimebetweenpickups;
   };
 
   const renderMetalDistribution = () => {
@@ -233,7 +239,8 @@ const ClientInfo = () => {
   };
 
   const renderPickupInfo = () => {
-    if (client.clienttype === 'insulation') return null;
+    // don't show pickup info for insulation clients
+    if(client.clienttype === 'insulation') return null;
 
     return (
       <div className="card mb-4">
@@ -247,13 +254,13 @@ const ClientInfo = () => {
           <p>
             Needs Pickup:{" "}
             <span 
-              className={`fw-bold ${client.needspickup ? 'bg-danger text-white' : ''}`}
+              className={`fw-bold ${needsPickup() ? 'bg-danger text-white' : ''}`}
               style={{
                 padding: '2px 6px',
                 borderRadius: '4px',
               }}
             >
-              {client.needspickup ? 'Yes' : 'No'}
+              {needsPickup() ? 'Yes' : 'No'}
             </span>
           </p>
         </div>
@@ -384,7 +391,7 @@ const ClientInfo = () => {
                     { label: 'Registration Date', key: 'registrationdate', type: 'date' },
                     { label: 'Location Contact', key: 'locationcontact', type: 'text' },
                     { label: 'Payment Method', key: 'paymentmethod', type: 'select' }, // Changed to 'select'
-                    { label: 'Last Pickup Date', key: 'lastpickupdate', type: 'date' }
+                    
                   ].map(({ label, key, type }) => (
                     <div className="form-group" key={key}>
                       <label htmlFor={key}>{label}:</label>
