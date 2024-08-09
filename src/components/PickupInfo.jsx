@@ -182,13 +182,13 @@ const PickupInfo = () => {
               <div className="col-md-6 mb-3">
                 <div className="card">
                   <div className="card-body">
-                    <h5 className="card-title"><strong>Search by Client</strong></h5>
-                    <p className="card-text">Returns the most recent pickup for a client.</p>
+                    <h5 className="card-title"><strong>Search by Term</strong></h5>
+                    <p className="card-text">Returns the most recent pickup for a client (search by name or location) or the most recent pickups by a specfic employee (search by name)</p>
                     <div className="search-container">
                       <input 
                         type="text" 
                         className="form-control" 
-                        placeholder="Enter client name or location" 
+                        placeholder="Enter search term" 
                         value={clientSearchTerm} 
                         onChange={(e) => setClientSearchTerm(e.target.value)}
                         onKeyUp={(e) => e.key === 'Enter' && handleClientSearch()}
