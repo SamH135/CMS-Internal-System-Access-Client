@@ -127,14 +127,14 @@ const Dashboard = () => {
 
 
         {/* Embedded RequestList */}
-        <div className="card outer-card">
+        {/* <div className="card outer-card">
           <div className="card-header text-center">
             <h5>Recent Requests</h5>
           </div>
           <div className="card-body">
             <RequestList embedded={true} />
           </div>
-        </div>
+        </div> */}
       </div>
       <style>
         {`
