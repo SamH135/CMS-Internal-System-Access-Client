@@ -12,10 +12,15 @@ const AddClient = () => {
     clientname: '',
     clientlocation: '',
     clienttype: 'auto',
-    avgtimebetweenpickups: '',
+    avgtimebetweenpickups: 0,
     locationnotes: '',
+    registrationdate: new Date().toISOString().split('T')[0],
     locationcontact: '',
-    paymentmethod: 'Cash'
+    totalpayout: 0,
+    totalvolume: 0,
+    paymentmethod: 'Cash',
+    lastpickupdate: new Date().toISOString().split('T')[0],
+    needspickup: false
   });
 
   const [message, setMessage] = useState('');
@@ -29,10 +34,10 @@ const AddClient = () => {
   }
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setClient(prevClient => ({
       ...prevClient,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -89,7 +94,7 @@ const AddClient = () => {
               </div>
               <div className="form-group">
                 <label htmlFor="avgtimebetweenpickups">Average Time Between Pickups (days):</label>
-                <input type="number" className="form-control" id="avgtimebetweenpickups" name="avgtimebetweenpickups" value={client.avgtimebetweenpickups} onChange={handleInputChange} />
+                <input type="number" className="form-control" id="avgtimebetweenpickups" name="avgtimebetweenpickups" value={client.avgtimebetweenpickups} onChange={handleInputChange} required />
               </div>
               <div className="form-group">
                 <label htmlFor="locationnotes">Location Notes:</label>
@@ -114,6 +119,7 @@ const AddClient = () => {
                   <option value="Direct Deposit">Direct Deposit</option>
                 </select>
               </div>
+              
               <button type="submit" className="btn btn-primary mt-3">Add Client</button>
             </form>
           </div>
