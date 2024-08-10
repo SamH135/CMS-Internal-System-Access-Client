@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosInstance';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -18,7 +17,6 @@ const CSVGenerator = () => {
   const [message, setMessage] = useState('');
   const [unresolvedChecks, setUnresolvedChecks] = useState([]);
   const [previewData, setPreviewData] = useState([]);
-  const navigate = useNavigate();
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const fetchPreviewData = useCallback(async () => {
